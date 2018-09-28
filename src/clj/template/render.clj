@@ -15,7 +15,7 @@
    [:head
     [:title "Fixme"]]
    [:body
-    [:h1 "Hello. Fixme"]
+    [:h1 "Hello. Fixme please"]
     (apply include-js (:javascripts config))
     (apply include-css (:styles config))]))
 
