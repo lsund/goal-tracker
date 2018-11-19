@@ -25,6 +25,7 @@
                  ;; Other
                  [com.taoensso/timbre "4.10.0"]
                  [io.aviso/pretty "0.1.34"]
+                 [clj-time/clj-time "0.15.0"]
 
                  ,,,]
 

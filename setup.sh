@@ -52,3 +52,6 @@ do
     echo "Replacing in: $file"
     sed -i -e "s/template/$projectname/" $file
 done
+
+echo "Done. Try starting up the repl, server and access localhost:$new_portnum"
+

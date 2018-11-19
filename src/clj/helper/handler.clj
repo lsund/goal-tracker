@@ -25,6 +25,22 @@
   (routes
    (GET "/" []
         (render/index config))
+   (GET "/goal" [id]
+        (render/goal config (db/element db :goal (util/parse-int id))))
+   (POST "/add-goal" [desc deadline]
+         (db/add :goal  {:description desc
+                         :deadline (util/->sqldate deadline)})
+         (redirect "/"))
+   (POST "/add-action-item" [desc goalid]
+         (db/add db :actionitem {:goalid (util/parse-int goalid)
+                                 :description desc})
+         (redirect (str "/goal?id=" goalid)))
+   (POST "/add-timed-task" [desc goal unit]
+         (db/add db :timedtask {:current 0
+                                :goal (util/parse-int goal)
+                                :description desc
+                                :unit unit})
+         (redirect "/"))
    (r/resources "/")
    (r/not-found render/not-found)))
 
