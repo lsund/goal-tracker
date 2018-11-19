@@ -10,7 +10,7 @@ CREATE TABLE ActionItem
     id              SERIAL PRIMARY KEY,
     goalId          INT NOT NULL,
     description     VARCHAR(64) NOT NULL,
-    FOREIGN KEY     (goalid) REFERENCES goal (id)
+    FOREIGN KEY     (goalId) REFERENCES goal (id)
 );
 
 CREATE TABLE Iteration
@@ -23,8 +23,12 @@ CREATE TABLE Iteration
 CREATE TABLE TimedTask
 (
     id              SERIAL PRIMARY KEY,
+    goalId          INT NOT NULL,
+    iterationId     INT NOT NULL,
     description     VARCHAR(64) NOT NULL,
     current         INT NOT NULL,
-    goal            INT NOT NULL,
-    unit            VArCHAR(8) NOT NULL
+    target          INT NOT NULL,
+    unit            VArCHAR(8) NOT NULL,
+    FOREIGN KEY     (goalId) REFERENCES goal (id),
+    FOREIGN KEY     (iterationId) REFERENCES iteration (id)
 );

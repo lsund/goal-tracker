@@ -43,8 +43,11 @@
       [:h3 (str "Current iteration: " startdate " to " enddate)]
       [:h3 (str "No current iteration")])
     (form-to [:post "/add-timed-task"]
+             ;; TODO add hidden inputs for goalid and iterationid here
+             ;; Iterationid should be the current iteration
+             ;; Goalid should be user input
              [:input {:name "desc" :type :text :placeholder "Task Description" :required "true"}]
-             [:input {:type :number :name "goal" :value 0 :required "true"}]
+             [:input {:type :number :name "target" :value 0 :required "true"}]
              [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
              [:input.hidden {:type :submit}])
     [:table
@@ -52,15 +55,16 @@
       [:tr
        [:th "Description"]
        [:th "Current"]
-       [:th "Goal"]
+       [:th "Target"]
        [:th "Unit"]
        [:th "Increment"]]]
      [:tbody
-      (for [{:keys [id description current goal unit]} (db/all db :timedtask)]
-        [:tr {:class (if (<= goal current) "green" "")}
+      (for [{:keys [id description current target unit]}
+            (db/all-where db :timedtask (str "iterationid=" (:id (db/current-iteration db))))]
+        [:tr {:class (if (<= target current) "green" "")}
          [:td description]
          [:td current]
-         [:td goal]
+         [:td target]
          [:td unit]
          [:td (form-to [:post "/increment-timed-task"]
                        [:input {:type :submit :value "+"}]

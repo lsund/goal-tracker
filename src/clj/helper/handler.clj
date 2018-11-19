@@ -35,10 +35,12 @@
          (db/add db :actionitem {:goalid (util/parse-int goalid)
                                  :description desc})
          (redirect (str "/goal?id=" goalid)))
-   (POST "/add-timed-task" [desc goal unit]
-         (db/add db :timedtask {:current 0
-                                :goal (util/parse-int goal)
+   (POST "/add-timed-task" [desc target unit]
+         (db/add db :timedtask {:goalid
+                                :iterationid
                                 :description desc
+                                :current 0
+                                :target (util/parse-int target)
                                 :unit unit})
          (redirect "/"))
    (POST "/increment-timed-task" [id]
