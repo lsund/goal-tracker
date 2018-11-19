@@ -21,7 +21,7 @@
 
 
 (defn- app-routes
-  [config]
+  [{:keys [db] :as config}]
   (routes
    (GET "/" []
         (render/index config))

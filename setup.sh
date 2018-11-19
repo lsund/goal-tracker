@@ -4,6 +4,9 @@ PORTS_FILE=~/.ports
 
 CSS_DIR=resources/public/css/
 
+[[ ! -e $PORTS_FILE ]] && echo "No file: $PORTS_FILE" && exit 1
+[[ ! -e $CSS_DIR ]] && echo "No file: $PORTS_FILE" && exit 1
+
 echo "Downloading MUI CSS"
 
 curl -X GET https://cdn.muicss.com/mui-0.9.39.zip -o mui.zip
@@ -38,6 +41,9 @@ new_portnum=$((highest_portnum + 1))
 
 sed -i -e "s/:port 1337/:port $new_portnum/" resources/edn/config.edn
 echo $new_portnum: $projectname >> $PORTS_FILE
+
+echo "Configuring database name to $projectname"
+sed -i -e "s/:name \"foo\"/:name \"$trainer\"/" resources/edn/config.edn
 
 echo "Replacing the keyword template in all files"
 
