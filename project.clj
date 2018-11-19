@@ -1,6 +1,6 @@
-(defproject template "0.1.0-SNAPSHOT"
+(defproject helper "0.1.0-SNAPSHOT"
   :description "TODO"
-  :url "https://github.com/lsund/template"
+  :url "https://github.com/lsund/helper"
 
 
   :min-lein-version "2.7.0"
@@ -35,28 +35,28 @@
   :source-paths ["src/clj" "src/cljs"]
 
   :ring
-  {:handler template.core/new-handler}
+  {:handler helper.core/new-handler}
 
   :main
-  template.main
+  helper.main
 
   :cljsbuild {:builds
               [{:id           "dev"
                 :source-paths ["src/cljs"]
 
-                :figwheel {:on-jsload "template.core/on-js-reload"
+                :figwheel {:on-jsload "helper.core/on-js-reload"
                            :open-urls ["http://localhost:3449/index.html"]}
 
-                :compiler {:main                 template.core
+                :compiler {:main                 helper.core
                            :asset-path           "js/compiled/out"
-                           :output-to            "resources/public/js/compiled/template.js"
+                           :output-to            "resources/public/js/compiled/helper.js"
                            :output-dir           "resources/public/js/compiled/out"
                            :source-map-timestamp true
                            :preloads             [devtools.preload]}}
                {:id           "min"
                 :source-paths ["src/cljs"]
-                :compiler     {:output-to     "resources/public/js/compiled/template.js"
-                               :main          template.core
+                :compiler     {:output-to     "resources/public/js/compiled/helper.js"
+                               :main          helper.core
                                :optimizations :advanced
                                :pretty-print  false}}]}
 

@@ -1,12 +1,12 @@
-(ns template.render
+(ns helper.render
   "Namespace for rendering hiccup"
   (:require
-   [template.db :as db]
+   [helper.db :as db]
    [taoensso.timbre :as logging]
    [hiccup.form :refer [form-to]]
    [hiccup.page :refer [html5 include-css include-js]]
-   [template.util :as util]
-   [template.html :as html]))
+   [helper.util :as util]
+   [helper.html :as html]))
 
 
 (defn index

@@ -1,4 +1,4 @@
-(ns template.server
+(ns helper.server
   "Namespace for defining the server component"
   (:require [com.stuartsierra.component :as c]
             [org.httpkit.server :refer [run-server]]))

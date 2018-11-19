@@ -1,10 +1,10 @@
-(ns template.core
+(ns helper.core
   "Namespace that defines the system of components."
   (:require
    [com.stuartsierra.component :as c]
-   [template.app :as app]
-   [template.server :as server]
-   [template.db :as db]))
+   [helper.app :as app]
+   [helper.server :as server]
+   [helper.db :as db]))
 
 (defn new-system
   [config]
