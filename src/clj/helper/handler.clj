@@ -41,6 +41,9 @@
                                 :description desc
                                 :unit unit})
          (redirect "/"))
+   (POST "/increment-timed-task" [id]
+         (db/increment db :timedtask :current (util/parse-int id))
+         (redirect "/"))
    (r/resources "/")
    (r/not-found render/not-found)))
 

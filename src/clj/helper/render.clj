@@ -53,14 +53,18 @@
        [:th "Description"]
        [:th "Current"]
        [:th "Goal"]
-       [:th "Unit"]]]
+       [:th "Unit"]
+       [:th "Increment"]]]
      [:tbody
-      (for [task (db/all db :timedtask)]
-        [:tr
-         [:td (str (:description task))]
-         [:td (str (:current task))]
-         [:td (str (:goal task))]
-         [:td (str (:unit task))]])]]
+      (for [{:keys [id description current goal unit]} (db/all db :timedtask)]
+        [:tr {:class (if (<= goal current) "green" "")}
+         [:td description]
+         [:td current]
+         [:td goal]
+         [:td unit]
+         [:td (form-to [:post "/increment-timed-task"]
+                       [:input {:type :submit :value "+"}]
+                       [:input {:type :hidden :name "id" :value id}])]])]]
     (apply include-js (:javascripts config))
     (apply include-css (:styles config))]))
 

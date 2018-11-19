@@ -43,6 +43,9 @@
 (defn all-where [db table clause]
   (j/query db [(str "SELECT * FROM " (name table) " WHERE " clause)]))
 
+(defn increment [db table column id]
+  (j/execute! db [(str "UPDATE " (name table) " SET " (name column) " = " (name column) " + 1 WHERE id=?") id]))
+
 (defn current-iteration [db]
   (let [now (util/->sqldate (time/now))]
     (first (j/query db

@@ -2,3 +2,7 @@
     visibility: hidden;
     position: absolute;
 }
+
+.green {
+    background-color: #b3ffb3;
+}
