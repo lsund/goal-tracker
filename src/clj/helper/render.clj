@@ -1,6 +1,7 @@
 (ns helper.render
   "Namespace for rendering hiccup"
   (:require
+   [medley.core :refer [find-first]]
    [helper.db :as db]
    [taoensso.timbre :as logging]
    [hiccup.form :refer [form-to]]
@@ -55,6 +56,18 @@
                [:input {:type :hidden :name "iterationid" :value (:id iter)}]
                [:input {:type :text :name "desc" :placeholder "Task Description" :required "true"}]
                [:input.hidden {:type :submit}])
+      [:h2 "Add new reading item"]
+      (form-to [:post "/add-reading-task"]
+               [:select {:name "actionitemid"}
+                (for [item (db/all db :actionitem)]
+                  [:option {:value (:id item)} (:description item)])]
+               [:select {:name "bookid"}
+                (for [book (db/all db :book)]
+                  [:option {:value (:id book)} (:title book)])]
+               [:input {:type :hidden :name "goalid" :value (:id goal)}]
+               [:input {:type :hidden :name "iterationid" :value (:id iter)}]
+               [:input {:type :number :name "page" :required "true"}]
+               [:input.hidden {:type :submit}])
       (if iter
         [:h2 (str "Current iteration: " (:startdate iter) " to " (:enddate iter))]
         [:h2 (str "No current iteration")])
@@ -97,10 +110,30 @@
                                                  (:id goal)))]
           [:tr {:class (if done "green" "")}
            [:td description]
-           [:td (form-to [:post "/check-checked-task"]
+           [:td (form-to [:post "/mark-as-done/checkedtask"]
                          [:input {:type :submit :value "+"}]
                          [:input {:type :hidden :name "goalid" :value (:id goal)}]
                          [:input {:type :hidden :name "id" :value id}])]])]]
+      [:table
+       [:thead
+        [:tr
+         [:th "Title"]
+         [:th "Page"]
+         [:th "Mark as Done"]]]
+       [:tbody
+        (let [books (db/all db :book)]
+          (for [{:keys [id bookid page done]}
+                (db/all-where db :readingtask (str "iterationid="
+                                                   (:id (db/current-iteration db))
+                                                   " and goalid="
+                                                   (:id goal)))]
+            [:tr {:class (if done "green" "")}
+             [:td (:title (find-first #(= (:id %) bookid) books))]
+             [:td page]
+             [:td (form-to [:post "/mark-as-done/readingtask"]
+                           [:input {:type :submit :value "+"}]
+                           [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                           [:input {:type :hidden :name "id" :value id}])]]))]]
       (apply include-js (:javascripts config))
       (apply include-css (:styles config))])))
 

@@ -63,6 +63,7 @@ CREATE TABLE ReadingTask
     actionItemId    INT NOT NULL,
     BookId          INT NOT NULL,
     page            INT NOT NULL,
+    done            BOOLEAN NOT NULL,
     FOREIGN KEY     (goalId) REFERENCES goal (id),
     FOREIGN KEY     (actionItemId) REFERENCES ActionItem (id),
     FOREIGN KEY     (iterationId) REFERENCES iteration (id),
