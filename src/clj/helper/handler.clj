@@ -36,9 +36,15 @@
         (render/index config))
    (GET "/goal" [id]
         (render/goal config (db/element db :goal (util/parse-int id))))
+   (GET "/books" []
+        (render/books config (db/all db :book)))
    (POST "/add-goal" [desc deadline]
-         (db/add :goal  {:description desc
-                         :deadline (util/->sqldate deadline)})
+         (db/add :goal {:description desc
+                        :deadline (util/->sqldate deadline)})
+         (redirect "/"))
+   (POST "/add-book" [title]
+         (db/add db :book {:title title
+                           :done false})
          (redirect "/"))
    (POST "/add-action-item" [desc goalid]
          (db/add db :actionitem {:goalid (util/parse-int goalid)
@@ -61,12 +67,12 @@
                                   :description desc})
          (redirect (str "/goal?id=" goalid)))
    #_(POST "/add-reading-task" [desc goalid iterationid actionitemid]
-         (db/add db :checkedtask {:goalid (util/parse-int goalid)
-                                  :actionitemid (util/parse-int actionitemid)
-                                  :iterationid (util/parse-int iterationid)
-                                  :done false
-                                  :description desc})
-         (redirect (str "/goal?id=" goalid)))
+           (db/add db :checkedtask {:goalid (util/parse-int goalid)
+                                    :actionitemid (util/parse-int actionitemid)
+                                    :iterationid (util/parse-int iterationid)
+                                    :done false
+                                    :description desc})
+           (redirect (str "/goal?id=" goalid)))
    (POST "/increment-incremental-task" [id goalid]
          (db/increment db :incrementaltask :current (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
@@ -74,8 +80,8 @@
          (db/update db :checkedtask {:done true} (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
    #_(POST "/update-reading-task" [id goalid]
-         (db/update db :checkedtask {:done true} (util/parse-int id))
-         (redirect (str "/goal?id=" goalid)))
+           (db/update db :checkedtask {:done true} (util/parse-int id))
+           (redirect (str "/goal?id=" goalid)))
    (r/resources "/")
    (r/not-found render/not-found)))
 

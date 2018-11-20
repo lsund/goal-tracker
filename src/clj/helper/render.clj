@@ -8,6 +8,20 @@
    [helper.util :as util]
    [helper.html :as html]))
 
+(defn books [config books]
+  (html5
+   [:head
+    [:title "Books"]]
+   [:body
+    (html/navbar)
+    [:h2 "Add book"]
+    (form-to [:post "/add-book"]
+             [:input {:name "title" :type :text :placeholder "Book Title" :required "true"}])
+    [:ul
+     (for [book books]
+       [:li (:title book)])]
+    (apply include-js (:javascripts config))
+    (apply include-css (:styles config))]))
 
 (defn goal [{:keys [db] :as config} goal]
   (let [iter (db/current-iteration db)]
@@ -15,6 +29,7 @@
      [:head
       [:title "Helper"]]
      [:body
+      (html/navbar)
       [:h1 (:description goal)]
       [:h2 "Add action item"]
       (form-to [:post "/add-action-item"]
@@ -94,6 +109,7 @@
    [:head
     [:title "Helper"]]
    [:body
+    (html/navbar)
     [:h1 "Helper"]
     [:p "This is a tool for personal development"]
     [:h2 "Add new goal"]
