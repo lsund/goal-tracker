@@ -33,14 +33,38 @@
   [{:keys [db] :as config}]
   (routes
    (GET "/" []
-        (render/index config))
+        (render/index config (db/all db :goal)))
    (GET "/goal" [id]
-        (render/goal config (db/element db :goal (util/parse-int id))))
+        (let [current-iteration (db/current-iteration db)
+              goalid (util/parse-int id)]
+          (render/goal config
+                       {:goal (db/element db :goal (util/parse-int id))
+                        :current-iteration current-iteration
+                        :actionitems (db/all-where db
+                                                   :actionitem
+                                                   (str "goalid=" goalid))
+                        :books (db/all db :book)
+                        :incremental-tasks (db/all-where db
+                                                         :incrementaltask
+                                                         (str "iterationid="
+                                                              (:id current-iteration)
+                                                              " and goalid="
+                                                              goalid))
+                        :checked-tasks (db/all-where db
+                                                     :checkedtask
+                                                     (str "iterationid="
+                                                          (:id current-iteration)
+                                                          " and goalid="
+                                                          goalid))
+                        :reading-tasks (db/all-where db :readingtask (str "iterationid="
+                                                                          (:id current-iteration)
+                                                                          " and goalid="
+                                                                          goalid))})))
    (GET "/books" []
         (render/books config (db/all db :book)))
    (POST "/add-goal" [desc deadline]
-         (db/add :goal {:description desc
-                        :deadline (util/->sqldate deadline)})
+         (db/add db :goal {:description desc
+                           :deadline (util/->sqldate deadline)})
          (redirect "/"))
    (POST "/add-book" [title]
          (db/add db :book {:title title
