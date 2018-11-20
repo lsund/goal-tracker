@@ -53,8 +53,28 @@
                                       :target (util/parse-int target)
                                       :unit unit})
          (redirect (str "/goal?id=" goalid)))
+   (POST "/add-checked-task" [desc goalid iterationid actionitemid]
+         (db/add db :checkedtask {:goalid (util/parse-int goalid)
+                                  :actionitemid (util/parse-int actionitemid)
+                                  :iterationid (util/parse-int iterationid)
+                                  :done false
+                                  :description desc})
+         (redirect (str "/goal?id=" goalid)))
+   #_(POST "/add-reading-task" [desc goalid iterationid actionitemid]
+         (db/add db :checkedtask {:goalid (util/parse-int goalid)
+                                  :actionitemid (util/parse-int actionitemid)
+                                  :iterationid (util/parse-int iterationid)
+                                  :done false
+                                  :description desc})
+         (redirect (str "/goal?id=" goalid)))
    (POST "/increment-incremental-task" [id goalid]
          (db/increment db :incrementaltask :current (util/parse-int id))
+         (redirect (str "/goal?id=" goalid)))
+   (POST "/check-checked-task" [id goalid]
+         (db/update db :checkedtask {:done true} (util/parse-int id))
+         (redirect (str "/goal?id=" goalid)))
+   #_(POST "/update-reading-task" [id goalid]
+         (db/update db :checkedtask {:done true} (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
    (r/resources "/")
    (r/not-found render/not-found)))

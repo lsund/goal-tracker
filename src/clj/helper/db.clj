@@ -34,6 +34,9 @@
 (defn all [db table]
   (j/query db [(str "SELECT * FROM " (name table))]))
 
+(defn update [db table update-map id]
+  (j/update! db table update-map ["id=?" id]))
+
 (defn element [db table id]
   (first (j/query db [(str "SELECT * FROM " (name table) " WHERE id=?") id])))
 

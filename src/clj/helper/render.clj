@@ -20,7 +20,7 @@
       (form-to [:post "/add-action-item"]
                [:input {:name "desc" :type :text :placeholder "Action Item Description" :required "true"}]
                [:input {:name "goalid" :type :hidden :value (:id goal)}])
-      [:h2 "Add new action item"]
+      [:h2 "Add new incremental item"]
       (form-to [:post "/add-incremental-task"]
                [:select {:name "actionitemid"}
                 (for [item (db/all db :actionitem)]
@@ -30,6 +30,15 @@
                [:input {:type :text :name "desc" :placeholder "Task Description" :required "true"}]
                [:input {:type :number :name "target" :value 0 :required "true"}]
                [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
+               [:input.hidden {:type :submit}])
+      [:h2 "Add new checked item"]
+      (form-to [:post "/add-checked-task"]
+               [:select {:name "actionitemid"}
+                (for [item (db/all db :actionitem)]
+                  [:option {:value (:id item)} (:description item)])]
+               [:input {:type :hidden :name "goalid" :value (:id goal)}]
+               [:input {:type :hidden :name "iterationid" :value (:id iter)}]
+               [:input {:type :text :name "desc" :placeholder "Task Description" :required "true"}]
                [:input.hidden {:type :submit}])
       (if iter
         [:h2 (str "Current iteration: " (:startdate iter) " to " (:enddate iter))]
@@ -57,6 +66,23 @@
            [:td target]
            [:td unit]
            [:td (form-to [:post "/increment-incremental-task"]
+                         [:input {:type :submit :value "+"}]
+                         [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                         [:input {:type :hidden :name "id" :value id}])]])]]
+      [:table
+       [:thead
+        [:tr
+         [:th "Description"]
+         [:th "Mark as Done"]]]
+       [:tbody
+        (for [{:keys [id description done]}
+              (db/all-where db :checkedtask (str "iterationid="
+                                                 (:id (db/current-iteration db))
+                                                 " and goalid="
+                                                 (:id goal)))]
+          [:tr {:class (if done "green" "")}
+           [:td description]
+           [:td (form-to [:post "/check-checked-task"]
                          [:input {:type :submit :value "+"}]
                          [:input {:type :hidden :name "goalid" :value (:id goal)}]
                          [:input {:type :hidden :name "id" :value id}])]])]]
