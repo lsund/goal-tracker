@@ -49,4 +49,4 @@
 (defn current-iteration [db]
   (let [now (util/->sqldate (time/now))]
     (first (j/query db
-                    [(str "SELECT * FROM iteration where ? > startdate and ? < enddate") now now]))))
+                     [(str "SELECT * FROM iteration where ? > startdate and ? < enddate") now now]))))

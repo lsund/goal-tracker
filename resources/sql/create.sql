@@ -20,11 +20,12 @@ CREATE TABLE Iteration
     endDate         DATE NOT NULL
 );
 
-CREATE TABLE TimedTask
+CREATE TABLE IncrementalTask
 (
     id              SERIAL PRIMARY KEY,
     goalId          INT NOT NULL,
     iterationId     INT NOT NULL,
+    actionItemId    INT NOT NULL,
     description     VARCHAR(64) NOT NULL,
     current         INT NOT NULL,
     target          INT NOT NULL,

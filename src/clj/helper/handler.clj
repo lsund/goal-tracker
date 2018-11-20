@@ -19,6 +19,15 @@
    [helper.util :as util]
    [helper.render :as render]))
 
+(defn ensure-current-iteration [handler db]
+  (fn [req]
+    (when-not (db/current-iteration db)
+      (let [now (time/now)
+            first-day (time/first-day-of-the-month now)
+            last-day (time/last-day-of-the-month now)]
+        (db/add db :iteration {:startdate (util/->sqldate first-day)
+                               :enddate (util/->sqldate last-day)})))
+    (handler req)))
 
 (defn- app-routes
   [{:keys [db] :as config}]
@@ -35,23 +44,25 @@
          (db/add db :actionitem {:goalid (util/parse-int goalid)
                                  :description desc})
          (redirect (str "/goal?id=" goalid)))
-   (POST "/add-timed-task" [desc target unit]
-         (db/add db :timedtask {:goalid
-                                :iterationid
-                                :description desc
-                                :current 0
-                                :target (util/parse-int target)
-                                :unit unit})
-         (redirect "/"))
-   (POST "/increment-timed-task" [id]
-         (db/increment db :timedtask :current (util/parse-int id))
-         (redirect "/"))
+   (POST "/add-incremental-task" [desc target unit goalid iterationid actionitemid]
+         (db/add db :incrementaltask {:goalid (util/parse-int goalid)
+                                      :actionitemid (util/parse-int actionitemid)
+                                      :iterationid (util/parse-int iterationid)
+                                      :description desc
+                                      :current 0
+                                      :target (util/parse-int target)
+                                      :unit unit})
+         (redirect (str "/goal?id=" goalid)))
+   (POST "/increment-incremental-task" [id goalid]
+         (db/increment db :incrementaltask :current (util/parse-int id))
+         (redirect (str "/goal?id=" goalid)))
    (r/resources "/")
    (r/not-found render/not-found)))
 
 (defn new-handler
   [config]
   (-> (app-routes config)
+      (ensure-current-iteration (:db config))
       (wrap-keyword-params)
       (wrap-params)
       (wrap-defaults
