@@ -90,14 +90,16 @@
            [:table
             [:thead
              [:tr
+              [:th "Priority"]
               [:th "Description"]
               [:th "Current"]
               [:th "Target"]
               [:th "Unit"]
               [:th "Increment"]]]
             [:tbody
-             (for [{:keys [id description current target unit]} (sort-by :description incremental-tasks)]
+             (for [{:keys [priority id description current target unit]} (sort-by :description incremental-tasks)]
                [:tr {:class (if (<= target current) "green" "")}
+                [:td priority]
                 [:td description]
                 [:td current]
                 [:td target]
@@ -109,11 +111,13 @@
            [:table
             [:thead
              [:tr
+              [:th "Priority"]
               [:th "Description"]
               [:th "Mark as Done"]]]
             [:tbody
-             (for [{:keys [id description done]} checked-tasks]
+             (for [{:keys [id priority description done]} checked-tasks]
                [:tr {:class (if done "green" "")}
+                [:td priority]
                 [:td description]
                 [:td (form-to [:post "/mark-as-done/checkedtask"]
                               [:input {:type :submit :value "+"}]
@@ -122,12 +126,14 @@
            [:table
             [:thead
              [:tr
+              [:th "Priority"]
               [:th "Title"]
               [:th "Page"]
               [:th "Mark as Done"]]]
             [:tbody
-             (for [{:keys [id bookid page done]} reading-tasks]
+             (for [{:keys [id priority bookid page done]} reading-tasks]
                [:tr {:class (if done "green" "")}
+                [:td priority]
                 [:td (:title (find-first #(= (:id %) bookid) books))]
                 [:td page]
                 [:td (form-to [:post "/mark-as-done/readingtask"]
