@@ -53,3 +53,15 @@
   (let [now (util/->sqldate (time/now))]
     (first (j/query db
                      [(str "SELECT * FROM iteration where ? > startdate and ? < enddate") now now]))))
+
+(defn done-goal-ids [db iterationid]
+  (map :id (j/query db
+                    ["SELECT id FROM goal WHERE id NOT IN (
+                     (SELECT distinct(goalid) FROM checkedtask WHERE done = false AND iterationid = ?)
+                     UNION
+                     (SELECT distinct(goalid) FROM incrementaltask WHERE current < target AND iterationid = ?)
+                     UNION
+                     (SELECT distinct(goalid) FROM readingtask WHERE done = false AND iterationid = ?));"
+                     iterationid
+                     iterationid
+                     iterationid])))

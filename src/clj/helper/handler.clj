@@ -3,18 +3,14 @@
   (:require
    [compojure.route :as r]
    [compojure.core :refer [routes GET POST ANY]]
-
-
+   [clj-time.core :as time]
    [ring.util.response :refer [redirect]]
    [ring.middleware
     [defaults :refer [site-defaults wrap-defaults]]
     [keyword-params :refer [wrap-keyword-params]]
     [params :refer [wrap-params]]]
-
-   ;; Logging
    [taoensso.timbre :as logging]
    [taoensso.timbre.appenders.core :as appenders]
-
    [helper.db :as db]
    [helper.util :as util]
    [helper.render :as render]))
@@ -33,7 +29,7 @@
   [{:keys [db] :as config}]
   (routes
    (GET "/" []
-        (render/index config (db/all db :goal)))
+        (render/index config (db/all db :goal) (db/done-goal-ids db (:id (db/current-iteration db)))))
    (GET "/goal" [id]
         (let [current-iteration (db/current-iteration db)
               goalid (util/parse-int id)]

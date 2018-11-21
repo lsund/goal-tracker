@@ -96,7 +96,7 @@
               [:th "Unit"]
               [:th "Increment"]]]
             [:tbody
-             (for [{:keys [id description current target unit]} incremental-tasks]
+             (for [{:keys [id description current target unit]} (sort-by :description incremental-tasks)]
                [:tr {:class (if (<= target current) "green" "")}
                 [:td description]
                 [:td current]
@@ -135,7 +135,7 @@
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}])]])]]]))
 
-(defn index [config goals]
+(defn index [config goals done-goal-ids]
   (layout config
           "Overview"
           [:div
@@ -150,8 +150,9 @@
                     [:input {:type :date :name "deadline" :required "true"}])
            [:h2 "Current Goals"]
            [:ol
-            (for [goal goals]
-              [:li [:div [:a {:href (str "/goal?id=" (:id goal))} (str (:description goal)
+            (for [goal (sort-by :priority goals)]
+              [:li [:div {:class (if (some #{(:id goal)} done-goal-ids) "green" "")}
+                    [:a {:href (str "/goal?id=" (:id goal))} (str (:description goal)
                                                                        " by "
                                                                        (:deadline goal))]]])]]))
 
