@@ -29,7 +29,9 @@
   [{:keys [db] :as config}]
   (routes
    (GET "/" []
-        (render/index config (db/all db :goal) (db/done-goal-ids db (:id (db/current-iteration db)))))
+        (render/index config
+                      (db/all db :goal)
+                      (db/done-goal-ids db (:id (db/current-iteration db)))))
    (GET "/goal" [id]
         (let [current-iteration (db/current-iteration db)
               goalid (util/parse-int id)]
@@ -70,7 +72,7 @@
          (db/add db :actionitem {:goalid (util/parse-int goalid)
                                  :description desc})
          (redirect (str "/goal?id=" goalid)))
-   (POST "/add-incremental-task" [desc target unit goalid iterationid actionitemid]
+   (POST "/add-incrementaltask" [desc target unit goalid iterationid actionitemid]
          (db/add db :incrementaltask {:goalid (util/parse-int goalid)
                                       :actionitemid (util/parse-int actionitemid)
                                       :iterationid (util/parse-int iterationid)
@@ -94,11 +96,14 @@
                                   :page (util/parse-int page)
                                   :done false})
          (redirect (str "/goal?id=" goalid)))
-   (POST "/increment-incremental-task" [id goalid]
+   (POST "/increment-incrementaltask" [id goalid]
          (db/increment db :incrementaltask :current (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
    (POST "/mark-as-done/:table" [table id goalid]
          (db/update db (keyword table) {:done true} (util/parse-int id))
+         (redirect (str "/goal?id=" goalid)))
+   (POST "/tweak-priority/:op/:table" [op table id goalid]
+         (db/tweak-priority db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
    (r/resources "/")
    (r/not-found render/not-found)))

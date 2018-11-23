@@ -31,6 +31,23 @@
             (for [book books]
               [:li (:title book)])]]))
 
+(defn- add-task [actionitems current-iteration]
+  [:div
+   [:h2 "Add new incremental item"]
+   (form-to [:post "/add-incrementaltask"]
+            [:select {:name "actionitemid"}
+             (for [item actionitems]
+               [:option {:value (:id item)} (:description item)])]
+            [:input {:type :hidden :name "goalid" :value (:id goal)}]
+            [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
+            [:input {:type :text
+                     :name "desc"
+                     :placeholder "Task Description"
+                     :required "true"}]
+            [:input {:type :number :name "target" :value 0 :required "true"}]
+            [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
+            [:input.hidden {:type :submit}])])
+
 (defn goal [config {:keys [goal current-iteration actionitems books incremental-tasks checked-tasks reading-tasks]}]
   (layout config
           "Goal"
@@ -46,22 +63,11 @@
            [:ul
             (for [item actionitems]
               [:li (str (:description item))])]
-           [:h2 "Add new incremental item"]
-           (form-to [:post "/add-incremental-task"]
-                    [:select {:name "actionitemid"}
-                     (for [item actionitems]
-                       [:option {:value (:id item)} (:description item)])]
-                    [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                    [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
-                    [:input {:type :text
-                             :name "desc"
-                             :placeholder "Task Description"
-                             :required "true"}]
-                    [:input {:type :number :name "target" :value 0 :required "true"}]
-                    [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
-                    [:input.hidden {:type :submit}])
+
+           (add-task actionitems current-iteration)
+
            [:h2 "Add new checked item"]
-           (form-to [:post "/add-checked-task"]
+           (form-to [:post "/add-checkedtask"]
                     [:select {:name "actionitemid"}
                      (for [item actionitems]
                        [:option {:value (:id item)} (:description item)])]
@@ -73,7 +79,7 @@
                              :required "true"}]
                     [:input.hidden {:type :submit}])
            [:h2 "Add new reading item"]
-           (form-to [:post "/add-reading-task"]
+           (form-to [:post "/add-readingtask"]
                     [:select {:name "actionitemid"}
                      (for [item actionitems]
                        [:option {:value (:id item)} (:description item)])]
@@ -95,7 +101,9 @@
               [:th "Current"]
               [:th "Target"]
               [:th "Unit"]
-              [:th "Increment"]]]
+              [:th "Increment"]
+              [:th "Up priority"]
+              [:th "Down priority"]]]
             [:tbody
              (for [{:keys [priority id description current target unit]} (sort-by :description incremental-tasks)]
                [:tr {:class (if (<= target current) "green" "")}
@@ -104,8 +112,16 @@
                 [:td current]
                 [:td target]
                 [:td unit]
-                [:td (form-to [:post "/increment-incremental-task"]
+                [:td (form-to [:post "/increment-incrementaltask"]
                               [:input {:type :submit :value "+"}]
+                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                              [:input {:type :hidden :name "id" :value id}])]
+                [:td (form-to [:post "/tweak-priority/up/incrementaltask"]
+                              [:input {:type :submit :value "^"}]
+                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                              [:input {:type :hidden :name "id" :value id}])]
+                [:td (form-to [:post "/tweak-priority/down/incrementaltask"]
+                              [:input {:type :submit :value "v"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}])]])]]
            [:table
@@ -113,7 +129,9 @@
              [:tr
               [:th "Priority"]
               [:th "Description"]
-              [:th "Mark as Done"]]]
+              [:th "Mark as Done"]
+              [:th "Up priority"]
+              [:th "Down priority"]]]
             [:tbody
              (for [{:keys [id priority description done]} checked-tasks]
                [:tr {:class (if done "green" "")}
@@ -122,6 +140,14 @@
                 [:td (form-to [:post "/mark-as-done/checkedtask"]
                               [:input {:type :submit :value "+"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                              [:input {:type :hidden :name "id" :value id}])]
+                [:td (form-to [:post "/tweak-priority/up/checkedtask"]
+                              [:input {:type :submit :value "^"}]
+                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                              [:input {:type :hidden :name "id" :value id}])]
+                [:td (form-to [:post "/tweak-priority/down/checkedtask"]
+                              [:input {:type :submit :value "v"}]
+                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}])]])]]
            [:table
             [:thead
@@ -129,7 +155,8 @@
               [:th "Priority"]
               [:th "Title"]
               [:th "Page"]
-              [:th "Mark as Done"]]]
+              [:th "Mark as Done"]
+              [:th "Up Priority"]]]
             [:tbody
              (for [{:keys [id priority bookid page done]} reading-tasks]
                [:tr {:class (if done "green" "")}
@@ -138,6 +165,10 @@
                 [:td page]
                 [:td (form-to [:post "/mark-as-done/readingtask"]
                               [:input {:type :submit :value "+"}]
+                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                              [:input {:type :hidden :name "id" :value id}])]
+                [:td (form-to [:post "/tweak-priority/up/readingtask"]
+                              [:input {:type :submit :value "^"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}])]])]]]))
 
@@ -159,7 +190,7 @@
             (for [goal (sort-by :priority goals)]
               [:li [:div {:class (if (some #{(:id goal)} done-goal-ids) "green" "")}
                     [:a {:href (str "/goal?id=" (:id goal))} (str (:description goal)
-                                                                       " by "
-                                                                       (:deadline goal))]]])]]))
+                                                                  " by "
+                                                                  (:deadline goal))]]])]]))
 
 (def not-found (html5 "not found"))

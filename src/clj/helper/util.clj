@@ -14,3 +14,13 @@
   (condp = (type x)
     java.lang.String (new java.sql.Date  (.getMillis (parse-date x)))
     org.joda.time.DateTime (new java.sql.Date  (.getMillis x))))
+
+(defn succ [x]
+  (condp = (type x)
+    java.lang.Character (-> x int inc char)
+    java.lang.Integer (inc x)))
+
+(defn pred [x]
+  (condp = (type x)
+    java.lang.Character (-> x int dec char)
+    java.lang.Integer (inc x)))
