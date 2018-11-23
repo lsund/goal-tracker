@@ -31,24 +31,41 @@
             (for [book books]
               [:li (:title book)])]]))
 
-(defn- add-task [actionitems current-iteration]
-  [:div
-   [:h2 "Add new incremental item"]
-   (form-to [:post "/add-incrementaltask"]
-            [:select {:name "actionitemid"}
-             (for [item actionitems]
-               [:option {:value (:id item)} (:description item)])]
-            [:input {:type :hidden :name "goalid" :value (:id goal)}]
-            [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
-            [:input {:type :text
-                     :name "desc"
-                     :placeholder "Task Description"
-                     :required "true"}]
-            [:input {:type :number :name "target" :value 0 :required "true"}]
-            [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
-            [:input.hidden {:type :submit}])])
+(defn add-task-form [{:keys [kind goal current-iteration actionitems]} extra-inputs]
+  (apply form-to
+         (concat [[:post (str "/add-task/" (name kind))]
+                  [:select {:name "actionitemid"}
+                   (for [item actionitems]
+                     [:option {:value (:id item)} (:description item)])]
+                  [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                  [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
+                  [:input {:type :text
+                           :name "desc"
+                           :placeholder "Task Description"
+                           :required "true"}]
+                  [:input.hidden {:type :submit}]]
+                 extra-inputs)))
 
-(defn goal [config {:keys [goal current-iteration actionitems books incremental-tasks checked-tasks reading-tasks]}]
+(defmulti add-task
+  (fn [params] (:kind params)))
+
+(defmethod add-task :incrementaltask [params]
+  [:div
+   [:h2 (str "Add new incremental task")]
+   (add-task-form params [[:input {:type :number :name "target" :value 0 :required "true"}]
+                          [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]])])
+
+(defmethod add-task :checkedtask [params]
+  [:div
+   [:h2 (str "Add new checked task")]
+   (add-task-form params [])])
+
+(defmethod add-task :readingtask [params]
+  [:div
+   [:h2 (str "Add new reading task")]
+   (add-task-form params [[:input {:type :number :name "page" :required "true"}]])])
+
+(defn goal [config {:keys [goal current-iteration actionitems books incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
           "Goal"
           [:div
@@ -63,33 +80,9 @@
            [:ul
             (for [item actionitems]
               [:li (str (:description item))])]
-
-           (add-task actionitems current-iteration)
-
-           [:h2 "Add new checked item"]
-           (form-to [:post "/add-checkedtask"]
-                    [:select {:name "actionitemid"}
-                     (for [item actionitems]
-                       [:option {:value (:id item)} (:description item)])]
-                    [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                    [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
-                    [:input {:type :text
-                             :name "desc"
-                             :placeholder "Task Description"
-                             :required "true"}]
-                    [:input.hidden {:type :submit}])
-           [:h2 "Add new reading item"]
-           (form-to [:post "/add-readingtask"]
-                    [:select {:name "actionitemid"}
-                     (for [item actionitems]
-                       [:option {:value (:id item)} (:description item)])]
-                    [:select {:name "bookid"}
-                     (for [book books]
-                       [:option {:value (:id book)} (:title book)])]
-                    [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                    [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
-                    [:input {:type :number :name "page" :required "true"}]
-                    [:input.hidden {:type :submit}])
+           (add-task (assoc params :kind :incrementaltask))
+           (add-task (assoc params :kind :checkedtask))
+           (add-task (assoc params :kind :readingtask))
            (if current-iteration
              [:h2 (str "Current iteration: " (:startdate current-iteration) " to " (:enddate current-iteration))]
              [:h2 (str "No current iteration")])

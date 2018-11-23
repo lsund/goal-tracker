@@ -72,29 +72,16 @@
          (db/add db :actionitem {:goalid (util/parse-int goalid)
                                  :description desc})
          (redirect (str "/goal?id=" goalid)))
-   (POST "/add-incrementaltask" [desc target unit goalid iterationid actionitemid]
-         (db/add db :incrementaltask {:goalid (util/parse-int goalid)
-                                      :actionitemid (util/parse-int actionitemid)
-                                      :iterationid (util/parse-int iterationid)
-                                      :description desc
-                                      :current 0
-                                      :target (util/parse-int target)
-                                      :unit unit})
-         (redirect (str "/goal?id=" goalid)))
-   (POST "/add-checked-task" [desc goalid iterationid actionitemid]
-         (db/add db :checkedtask {:goalid (util/parse-int goalid)
-                                  :actionitemid (util/parse-int actionitemid)
-                                  :iterationid (util/parse-int iterationid)
-                                  :done false
-                                  :description desc})
-         (redirect (str "/goal?id=" goalid)))
-   (POST "/add-reading-task" [bookid goalid iterationid actionitemid page]
-         (db/add db :readingtask {:goalid (util/parse-int goalid)
-                                  :actionitemid (util/parse-int actionitemid)
-                                  :iterationid (util/parse-int iterationid)
-                                  :bookid (util/parse-int bookid)
-                                  :page (util/parse-int page)
-                                  :done false})
+   (POST "/add-task/:kind" [kind desc target unit goalid iterationid actionitemid done page]
+         (db/add db (keyword kind) {:goalid (util/parse-int goalid)
+                                    :actionitemid (util/parse-int actionitemid)
+                                    :iterationid (util/parse-int iterationid)
+                                    :description desc
+                                    :current 0
+                                    :target (util/parse-int target)
+                                    :unit unit
+                                    :done done
+                                    :page (util/parse-int page)})
          (redirect (str "/goal?id=" goalid)))
    (POST "/increment-incrementaltask" [id goalid]
          (db/increment db :incrementaltask :current (util/parse-int id))
