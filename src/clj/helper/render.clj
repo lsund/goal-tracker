@@ -53,7 +53,8 @@
   [:div
    [:h2 (str "Add new incremental task")]
    (add-task-form params [[:input {:type :number :name "target" :value 0 :required "true"}]
-                          [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]])])
+                          [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
+                          [:input {:type :hidden :name "current" :value "0"}]])])
 
 (defmethod add-task :checkedtask [params]
   [:div

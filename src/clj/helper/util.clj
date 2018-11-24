@@ -5,7 +5,9 @@
 
 (defn stringify [k] (-> k name s/capitalize))
 
-(defn parse-int [s] (Integer. (re-find  #"\d+" s)))
+(defn parse-int [s]
+  (when s
+    (Integer. (re-find  #"\d+" s))))
 
 (defn parse-date [s]
   (time.format/parse (time.format/formatters :year-month-day) s))

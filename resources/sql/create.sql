@@ -73,3 +73,11 @@ CREATE TABLE ReadingTask
     FOREIGN KEY     (iterationId) REFERENCES iteration (id),
     FOREIGN KEY     (bookId) REFERENCES Book (id)
 );
+
+CREATE TABLE TaskUpdate
+(
+    id              SERIAL PRIMARY KEY,
+    taskId          INT NOT NULL,
+    taskType        INT NOT NULL,
+    day             DATE NOT NULL
+);
