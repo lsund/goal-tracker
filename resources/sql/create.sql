@@ -39,6 +39,7 @@ CREATE TABLE IncrementalTask
     target          INT NOT NULL,
     unit            VARCHAR(8) NOT NULL,
     priority        VARCHAR(1),
+    sequence        INT NOT NULL,
     FOREIGN KEY     (goalId) REFERENCES goal (id),
     FOREIGN KEY     (actionItemId) REFERENCES ActionItem (id),
     FOREIGN KEY     (iterationId) REFERENCES iteration (id)
@@ -53,6 +54,7 @@ CREATE TABLE CheckedTask
     description     VARCHAR(64) NOT NULL,
     done            BOOLEAN NOT NULL,
     priority        VARCHAR(1),
+    sequence        INT NOT NULL,
     FOREIGN KEY     (goalId) REFERENCES goal (id),
     FOREIGN KEY     (actionItemId) REFERENCES ActionItem (id),
     FOREIGN KEY     (iterationId) REFERENCES iteration (id)
@@ -68,6 +70,7 @@ CREATE TABLE ReadingTask
     page            INT NOT NULL,
     done            BOOLEAN NOT NULL,
     priority        VARCHAR(1),
+    sequence        INT NOT NULL,
     FOREIGN KEY     (goalId) REFERENCES goal (id),
     FOREIGN KEY     (actionItemId) REFERENCES ActionItem (id),
     FOREIGN KEY     (iterationId) REFERENCES iteration (id),

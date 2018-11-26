@@ -102,6 +102,16 @@
       (when (and nxt (apply <= (map int [\A nxt \C])))
         (update db table {:priority (str nxt)} id)))))
 
+(defn tweak-sequence [db table id op]
+  (let [f (if (= op :up) util/pred util/succ)
+        nxt (some-> db
+                    (j/query [(str "SELECT sequence from " (name table) " where id = ?") id])
+                    first
+                    :sequence
+                    f)]
+    (when (and nxt (< 0 nxt))
+      (update db table {:sequence nxt} id))))
+
 (defmulti task-log
   (fn [params] (:kind params)))
 

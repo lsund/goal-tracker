@@ -4,7 +4,7 @@
    [compojure.route :as r]
    [compojure.core :refer [routes GET POST ANY]]
    [clj-time.core :as time]
-   [medley.core :refer [filter-vals]]
+   [medley.core :refer [filter-vals map-vals]]
    [ring.util.response :refer [redirect]]
    [ring.middleware
     [defaults :refer [site-defaults wrap-defaults]]
@@ -27,22 +27,23 @@
     (handler req)))
 
 (defn- all-tasks [db iterationid goalid]
-  {:incremental-tasks (db/all-where db
-                                    :incrementaltask
-                                    (str "iterationid="
-                                         iterationid
-                                         " and goalid="
-                                         goalid))
-   :checked-tasks (db/all-where db
-                                :checkedtask
-                                (str "iterationid="
-                                     iterationid
-                                     " and goalid="
-                                     goalid))
-   :reading-tasks (db/all-where db :readingtask (str "iterationid="
-                                                     iterationid
-                                                     " and goalid="
-                                                     goalid))})
+  (map-vals (partial sort-by :sequence)
+       {:incremental-tasks (db/all-where db
+                                         :incrementaltask
+                                         (str "iterationid="
+                                              iterationid
+                                              " and goalid="
+                                              goalid))
+        :checked-tasks (db/all-where db
+                                     :checkedtask
+                                     (str "iterationid="
+                                          iterationid
+                                          " and goalid="
+                                          goalid))
+        :reading-tasks (db/all-where db :readingtask (str "iterationid="
+                                                          iterationid
+                                                          " and goalid="
+                                                          goalid))}))
 
 (defn- all-logs [db iterationid goalid]
   (let [params {:db db
@@ -104,6 +105,9 @@
          (redirect (str "/goal?id=" goalid)))
    (POST "/mark-as-done/:table" [table id goalid]
          (db/mark-as-done db (keyword table) (util/parse-int id))
+         (redirect (str "/goal?id=" goalid)))
+   (POST "/tweak-sequence/:op/:table" [op table id goalid]
+         (db/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
    (POST "/tweak-priority/:op/:table" [op table id goalid]
          (db/tweak-priority db (keyword table) (util/parse-int id) (keyword op))

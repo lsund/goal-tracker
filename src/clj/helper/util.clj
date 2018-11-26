@@ -25,4 +25,4 @@
 (defn pred [x]
   (condp = (type x)
     java.lang.Character (-> x int dec char)
-    java.lang.Integer (inc x)))
+    java.lang.Integer (dec x)))
