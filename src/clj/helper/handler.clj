@@ -26,6 +26,32 @@
                                :enddate (util/->sqldate last-day)})))
     (handler req)))
 
+(defn- all-tasks [db iterationid goalid]
+  {:incremental-tasks (db/all-where db
+                                    :incrementaltask
+                                    (str "iterationid="
+                                         iterationid
+                                         " and goalid="
+                                         goalid))
+   :checked-tasks (db/all-where db
+                                :checkedtask
+                                (str "iterationid="
+                                     iterationid
+                                     " and goalid="
+                                     goalid))
+   :reading-tasks (db/all-where db :readingtask (str "iterationid="
+                                                     iterationid
+                                                     " and goalid="
+                                                     goalid))})
+
+(defn- all-logs [db iterationid goalid]
+  (let [params {:db db
+                :goalid goalid
+                :iterationid iterationid}]
+    {:incremental-task-log (db/task-log (assoc params :kind :incremental))
+     :checked-task-log (db/task-log (assoc params :kind :checked))
+     :reading-task-log (db/task-log (assoc params :kind :reading))}))
+
 (defn- app-routes
   [{:keys [db] :as config}]
   (routes
@@ -37,28 +63,14 @@
         (let [current-iteration (db/current-iteration db)
               goalid (util/parse-int id)]
           (render/goal config
-                       {:goal (db/element db :goal (util/parse-int id))
-                        :current-iteration current-iteration
-                        :actionitems (db/all-where db
-                                                   :actionitem
-                                                   (str "goalid=" goalid))
-                        :books (db/all db :book)
-                        :incremental-tasks (db/all-where db
-                                                         :incrementaltask
-                                                         (str "iterationid="
-                                                              (:id current-iteration)
-                                                              " and goalid="
-                                                              goalid))
-                        :checked-tasks (db/all-where db
-                                                     :checkedtask
-                                                     (str "iterationid="
-                                                          (:id current-iteration)
-                                                          " and goalid="
-                                                          goalid))
-                        :reading-tasks (db/all-where db :readingtask (str "iterationid="
-                                                                          (:id current-iteration)
-                                                                          " and goalid="
-                                                                          goalid))})))
+                       (merge (all-tasks db (:id current-iteration) goalid)
+                              (all-logs db (:id current-iteration) goalid)
+                              {:goal (db/element db :goal (util/parse-int id))
+                               :current-iteration current-iteration
+                               :actionitems (db/all-where db
+                                                          :actionitem
+                                                          (str "goalid=" goalid))
+                               :books (db/all db :book)}))))
    (GET "/books" []
         (render/books config (db/all db :book)))
    (POST "/add-goal" [desc deadline]

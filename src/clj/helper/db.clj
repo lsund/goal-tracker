@@ -75,14 +75,52 @@
 (defn tweak-priority [db table id op]
   (let [f (if (= op :up) util/pred util/succ)
         nxt (some-> db
-                (j/query [(str "SELECT priority from " (name table) " where id = ?") id])
-                first
-                :priority
-                first
-                f)]
+                    (j/query [(str "SELECT priority from " (name table) " where id = ?") id])
+                    first
+                    :priority
+                    first
+                    f)]
     (if-not nxt
       (case op
         :up (update db table {:priority "A"} id)
         :down (update db table {:priority "C"} id))
       (when (and nxt (apply <= (map int [\A nxt \C])))
         (update db table {:priority (str nxt)} id)))))
+
+(defmulti task-log
+  (fn [params] (:kind params)))
+
+(defmethod task-log :incremental [{:keys [db iterationid goalid]}]
+  (j/query db
+           ["SELECT taskupdate.day, incrementaltask.description
+             FROM taskupdate
+             INNER JOIN incrementaltask ON taskupdate.taskid = incrementaltask.id
+             WHERE taskupdate.tasktype = 1
+             AND taskupdate.taskid IN
+               (SELECT id FROM incrementaltask WHERE iterationid = ? AND goalid = ?);"
+            iterationid
+            goalid]))
+
+(defmethod task-log :checked [{:keys [db goalid iterationid]}]
+  (j/query db
+           ["SELECT taskupdate.day, checkedtask.description
+             FROM taskupdate
+             INNER JOIN checkedtask ON taskupdate.taskid = checkedtask.id
+             WHERE taskupdate.tasktype = 2
+             AND taskupdate.taskid IN
+               (SELECT id FROM checkedtask WHERE iterationid = ? AND goalid = ?);"
+            iterationid
+            goalid]))
+
+(defmethod task-log :reading [{:keys [db goalid iterationid]}]
+  (j/query db
+           ["SELECT taskupdate.day, book.title
+             FROM taskupdate
+             INNER JOIN readingtask
+             ON taskupdate.taskid = readingtask.id
+             INNER JOIN book on book.id = readingtask.bookid
+             WHERE taskupdate.tasktype = 3
+             AND taskupdate.taskid IN
+              (SELECT id FROM readingtask WHERE iterationid = ? AND goalid = ?)"
+            iterationid
+            goalid]))

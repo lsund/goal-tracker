@@ -164,7 +164,19 @@
                 [:td (form-to [:post "/tweak-priority/up/readingtask"]
                               [:input {:type :submit :value "^"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]])]]]))
+                              [:input {:type :hidden :name "id" :value id}])]])]]
+           [:h3 "Updated incremental tasks"]
+           [:ul
+            (for [{:keys [description day]} (:incremental-task-log params)]
+              [:li (str description " done on " day)])]
+           [:h3 "Updated checked tasks"]
+           [:ul
+            (for [{:keys [description day]} (:checked-task-log params)]
+              [:li (str description " " day)])]
+           [:h3 "Updated reading tasks"]
+           [:ul
+            (for [{:keys [title day]} (:reading-task-log params)]
+              [:li (str title " " day)])]]))
 
 (defn index [config goals done-goal-ids]
   (layout config
