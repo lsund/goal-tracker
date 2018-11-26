@@ -106,7 +106,7 @@
                 [:td current]
                 [:td target]
                 [:td unit]
-                [:td (form-to [:post "/increment-incrementaltask"]
+                [:td (form-to [:post "/increment-task"]
                               [:input {:type :submit :value "+"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}])]
