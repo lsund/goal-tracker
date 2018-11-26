@@ -47,7 +47,22 @@
   (j/query db [(str "SELECT * FROM " (name table) " WHERE " clause)]))
 
 (defn increment [db table column id]
-  (j/execute! db [(str "UPDATE " (name table) " SET " (name column) " = " (name column) " + 1 WHERE id=?") id]))
+  (j/execute! db
+              [(str "UPDATE "
+                    (name table)
+                    " SET "
+                    (name column)
+                    " = "
+                    (name column)
+                    " + 1 WHERE id=?") id])
+  (add db :taskupdate {:taskid id :tasktype 1 :day (util/->sqldate (time/now))}))
+
+(defn mark-as-done [db table id]
+  (update db (keyword table) {:done true} id)
+  (let [tasktype (case table :checkedtask 2 :readingtask 3)]
+    (add db :taskupdate {:taskid id
+                         :tasktype tasktype
+                         :day (util/->sqldate (time/now))})))
 
 (defn current-iteration [db]
   (let [now (util/->sqldate (time/now))]

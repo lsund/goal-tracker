@@ -127,7 +127,7 @@
          (db/increment db :incrementaltask :current (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
    (POST "/mark-as-done/:table" [table id goalid]
-         (db/update db (keyword table) {:done true} (util/parse-int id))
+         (db/mark-as-done db (keyword table) (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
    (POST "/tweak-priority/:op/:table" [op table id goalid]
          (db/tweak-priority db (keyword table) (util/parse-int id) (keyword op))
