@@ -27,6 +27,7 @@
                  [io.aviso/pretty "0.1.34"]
                  [clj-time/clj-time "0.15.0"]
                  [medley "1.0.0"]
+                 [slingshot "0.12.2"]
 
                  ,,,]
 

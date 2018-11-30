@@ -5,13 +5,16 @@
             [com.stuartsierra.component :as c]
             [taoensso.timbre :as timbre]
             [helper.util :as util]
-            [helper.config :as config]))
+            [helper.config :as config]
+            [slingshot.slingshot :refer [throw+]]))
 
 
 (defn pg-db [config]
   {:dbtype "postgresql"
    :dbname (:name config)
    :user "postgres"})
+
+(def pg-db-val (pg-db {:name "helper"}))
 
 (defrecord Db [db db-config]
   c/Lifecycle
@@ -66,8 +69,11 @@
 
 (defn current-iteration [db]
   (let [now (util/->sqldate (time/now))]
-    (first (j/query db
-                    [(str "SELECT * FROM iteration where ? > startdate and ? < enddate") now now]))))
+    (if-let [iteration
+             (first (j/query db
+                             [(str "SELECT * FROM iteration where ? >= startdate and ? <= enddate") now now]))]
+      iteration
+      (throw+ {:type ::no-current-iteration}))))
 
 (defn done-goal-ids [db iterationid]
   (map :id (j/query db
