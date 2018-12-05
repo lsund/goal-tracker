@@ -103,9 +103,9 @@
    (POST "/increment-task" [id goalid]
          (db/increment db :incrementaltask :current (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
-   (POST "/toggle-done/:table" [table id goalid]
+   (POST "/toggle-done/:table" [table id goalid url]
          (db/toggle-done db (keyword table) (util/parse-int id))
-         (redirect (str "/goal?id=" goalid)))
+         (redirect url))
    (POST "/tweak-sequence/:op/:table" [op table id goalid]
          (db/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))

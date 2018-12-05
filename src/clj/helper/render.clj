@@ -159,7 +159,10 @@
                 [:td (form-to [:post "/toggle-done/checkedtask"]
                               [:input {:type :submit :value "+"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
+                              [:input {:type :hidden :name "id" :value id}]
+                              [:input {:type :hidden
+                                       :name "url"
+                                       :value (make-query-url "/goal" goal [:id])}])]
                 [:td (form-to [:post "/tweak-sequence/up/checkedtask"]
                               [:input {:type :submit :value "^"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
@@ -198,7 +201,10 @@
                 [:td (form-to [:post "/toggle-done/readingtask"]
                               [:input {:type :submit :value "+"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
+                              [:input {:type :hidden :name "id" :value id}]
+                              [:input {:type :hidden
+                                       :name "url"
+                                       :value (make-query-url "/goal" goal [:id])}])]
                 [:td (form-to [:post "/tweak-sequence/up/readingtask"]
                               [:input {:type :submit :value "^"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
