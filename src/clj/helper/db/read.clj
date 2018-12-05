@@ -1,4 +1,4 @@
-(ns helper.db.query
+(ns helper.db.read
   (:require [clojure.java.jdbc :as j]
             [clj-time.core :as time]
             [helper.util :as util]
@@ -8,7 +8,8 @@
   (first (j/query db [(str "SELECT * FROM " (name table) " WHERE id=?") id])))
 
 (defn value [db table column id]
-  (-> (j/query [(str "SELECT " (name column) " from " (name table) " where id = ?") id])
+  (-> db
+      (j/query [(str "SELECT " (name column) " from " (name table) " where id = ?") id])
       first
       column))
 

@@ -12,7 +12,7 @@
     [params :refer [wrap-params]]]
    [taoensso.timbre :as logging]
    [taoensso.timbre.appenders.core :as appenders]
-   [helper.db.query :as query]
+   [helper.db.read :as read]
    [helper.db.update :as update]
    [helper.db.create :as create]
    [helper.util :as util]
@@ -20,7 +20,7 @@
 
 (defn ensure-current-iteration [handler db]
   (fn [req]
-    (when-not (query/current-iteration db)
+    (when-not (read/current-iteration db)
       (let [now (time/now)
             first-day (time/first-day-of-the-month now)
             last-day (time/last-day-of-the-month now)]
@@ -30,19 +30,19 @@
 
 (defn- all-tasks [db iterationid goalid]
   (map-vals (partial sort-by :sequence)
-            {:incremental-tasks (query/all-where db
+            {:incremental-tasks (read/all-where db
                                                  :incrementaltask
                                                  (str "iterationid="
                                                       iterationid
                                                       " and goalid="
                                                       goalid))
-             :checked-tasks (query/all-where db
+             :checked-tasks (read/all-where db
                                              :checkedtask
                                              (str "iterationid="
                                                   iterationid
                                                   " and goalid="
                                                   goalid))
-             :reading-tasks (query/all-where db :readingtask (str "iterationid="
+             :reading-tasks (read/all-where db :readingtask (str "iterationid="
                                                                   iterationid
                                                                   " and goalid="
                                                                   goalid))}))
@@ -51,35 +51,35 @@
   (let [params {:db db
                 :goalid goalid
                 :iterationid iterationid}]
-    {:incremental-task-log (query/task-log (assoc params :kind :incremental))
-     :checked-task-log (query/task-log (assoc params :kind :checked))
-     :reading-task-log (query/task-log (assoc params :kind :reading))}))
+    {:incremental-task-log (read/task-log (assoc params :kind :incremental))
+     :checked-task-log (read/task-log (assoc params :kind :checked))
+     :reading-task-log (read/task-log (assoc params :kind :reading))}))
 
 (defn- app-routes
   [{:keys [db] :as config}]
   (routes
    (GET "/" [iteration-id]
         (render/index config
-                      (query/all db :goal)
-                      (query/done-goal-ids db (if iteration-id
+                      (read/all db :goal)
+                      (read/done-goal-ids db (if iteration-id
                                                 (util/parse-int iteration-id)
-                                                (:id (query/current-iteration db))))))
+                                                (:id (read/current-iteration db))))))
    (GET "/goal" [id]
-        (let [current-iteration (query/current-iteration db)
+        (let [current-iteration (read/current-iteration db)
               goalid (util/parse-int id)]
           (render/goal config
                        (merge (all-tasks db (:id current-iteration) goalid)
                               (all-logs db (:id current-iteration) goalid)
-                              {:goal (query/row db :goal (util/parse-int id))
+                              {:goal (read/row db :goal (util/parse-int id))
                                :current-iteration current-iteration
-                               :actionitems (query/all-where db
+                               :actionitems (read/all-where db
                                                              :actionitem
                                                              (str "goalid=" goalid))
-                               :books (query/all db :book)}))))
+                               :books (read/all db :book)}))))
    (GET "/books" []
-        (render/books config (query/all db :book)))
+        (render/books config (read/all db :book)))
    (POST "/add/:kind" [kind desc deadline goalid url]
-         (case kind
+         (case (keyword kind)
            :book (create/row db :book {:title desc
                                        :done false})
            :goal (create/row db :goal {:description desc

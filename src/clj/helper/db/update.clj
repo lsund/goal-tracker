@@ -2,7 +2,8 @@
   (:require [clojure.java.jdbc :as j]
             [helper.util :as util]
             [helper.db.create :as create]
-            [helper.db.query :as query]))
+            [helper.db.read :as read]
+            [helper.db.delete :as delete]))
 
 (defn- update-on-id [db table update-map id]
   (j/update! db table update-map ["id=?" id]))
@@ -19,14 +20,17 @@
   (create/taskupdate db :incrementaltask id))
 
 (defn toggle-done [db table id]
-  (update-on-id db (keyword table) {:done true} id)
-  (when (some #{(keyword table)} [:checkedtask :readingtask])
-    (create/taskupdate db table id)))
+  (let [done? (read/value db table :done id)]
+    (update-on-id db (keyword table) {:done (not done?)} id)
+    (when (some #{(keyword table)} [:checkedtask :readingtask])
+      (if done?
+        (create/taskupdate db table id)
+        (delete/by-id db table id)))))
 
 (defn tweak-priority [db table id op]
   (let [update-fn (if (= op :up) util/pred util/succ)
         nxt (some-> db
-                    (query/value db table :priority id)
+                    (read/value table :priority id)
                     first
                     update-fn)]
     (if-not nxt
@@ -39,7 +43,7 @@
 (defn tweak-sequence [db table id op]
   (let [update-fn (if (= op :up) util/pred util/succ)
         nxt (some-> db
-                    (query/value db table :sequence id)
+                    (read/value table :sequence id)
                     update-fn)]
     (when (and nxt (< 0 nxt))
       (update-on-id db table {:sequence nxt} id))))
