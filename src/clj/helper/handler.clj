@@ -108,10 +108,10 @@
    (POST "/toggle-done/:table" [table id url]
          (update/toggle-done db (keyword table) (util/parse-int id))
          (redirect url))
-   (POST "/tweak-sequence/:op/:table" [op table id goalid]
+   (POST "/sort/:op/:table" [op table id goalid]
          (update/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
-   (POST "/tweak-priority/:op/:table" [op table id goalid]
+   (POST "/prioritise/:op/:table" [op table id goalid]
          (update/tweak-priority db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
    (r/resources "/")
