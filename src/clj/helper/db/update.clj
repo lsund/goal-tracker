@@ -1,7 +1,8 @@
 (ns helper.db.update
   (:require [clojure.java.jdbc :as j]
             [helper.util :as util]
-            [helper.db.create :as create]))
+            [helper.db.create :as create]
+            [helper.db.query :as query]))
 
 (defn- update-on-id [db table update-map id]
   (j/update! db table update-map ["id=?" id]))
@@ -23,13 +24,11 @@
     (create/taskupdate db table id)))
 
 (defn tweak-priority [db table id op]
-  (let [f (if (= op :up) util/pred util/succ)
+  (let [update-fn (if (= op :up) util/pred util/succ)
         nxt (some-> db
-                    (j/query [(str "SELECT priority from " (name table) " where id = ?") id])
+                    (query/value db table :priority id)
                     first
-                    :priority
-                    first
-                    f)]
+                    update-fn)]
     (if-not nxt
       (case op
         :up (update-on-id db table {:priority "A"} id)
@@ -38,11 +37,9 @@
         (update db table {:priority (str nxt)} id)))))
 
 (defn tweak-sequence [db table id op]
-  (let [f (if (= op :up) util/pred util/succ)
+  (let [update-fn (if (= op :up) util/pred util/succ)
         nxt (some-> db
-                    (j/query [(str "SELECT sequence from " (name table) " where id = ?") id])
-                    first
-                    :sequence
-                    f)]
+                    (query/value db table :sequence id)
+                    update-fn)]
     (when (and nxt (< 0 nxt))
       (update-on-id db table {:sequence nxt} id))))

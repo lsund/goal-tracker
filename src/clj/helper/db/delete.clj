@@ -1,0 +1,2 @@
+(ns helper.db.delete
+  )

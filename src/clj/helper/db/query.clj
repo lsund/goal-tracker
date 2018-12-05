@@ -7,6 +7,11 @@
 (defn row [db table id]
   (first (j/query db [(str "SELECT * FROM " (name table) " WHERE id=?") id])))
 
+(defn value [db table column id]
+  (-> (j/query [(str "SELECT " (name column) " from " (name table) " where id = ?") id])
+      first
+      column))
+
 (defn all [db table]
   (j/query db [(str "SELECT * FROM " (name table))]))
 
