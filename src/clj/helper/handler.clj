@@ -28,22 +28,22 @@
 
 (defn- all-tasks [db iterationid goalid]
   (map-vals (partial sort-by :sequence)
-       {:incremental-tasks (db/all-where db
-                                         :incrementaltask
-                                         (str "iterationid="
-                                              iterationid
-                                              " and goalid="
-                                              goalid))
-        :checked-tasks (db/all-where db
-                                     :checkedtask
-                                     (str "iterationid="
-                                          iterationid
-                                          " and goalid="
-                                          goalid))
-        :reading-tasks (db/all-where db :readingtask (str "iterationid="
-                                                          iterationid
-                                                          " and goalid="
-                                                          goalid))}))
+            {:incremental-tasks (db/all-where db
+                                              :incrementaltask
+                                              (str "iterationid="
+                                                   iterationid
+                                                   " and goalid="
+                                                   goalid))
+             :checked-tasks (db/all-where db
+                                          :checkedtask
+                                          (str "iterationid="
+                                               iterationid
+                                               " and goalid="
+                                               goalid))
+             :reading-tasks (db/all-where db :readingtask (str "iterationid="
+                                                               iterationid
+                                                               " and goalid="
+                                                               goalid))}))
 
 (defn- all-logs [db iterationid goalid]
   (let [params {:db db
@@ -56,10 +56,12 @@
 (defn- app-routes
   [{:keys [db] :as config}]
   (routes
-   (GET "/" []
+   (GET "/" [iteration-id]
         (render/index config
                       (db/all db :goal)
-                      (db/done-goal-ids db (:id (db/current-iteration db)))))
+                      (db/done-goal-ids db (if iteration-id
+                                             (util/parse-int iteration-id)
+                                             (:id (db/current-iteration db))))))
    (GET "/goal" [id]
         (let [current-iteration (db/current-iteration db)
               goalid (util/parse-int id)]
@@ -74,18 +76,17 @@
                                :books (db/all db :book)}))))
    (GET "/books" []
         (render/books config (db/all db :book)))
-   (POST "/add-goal" [desc deadline]
-         (db/add db :goal {:description desc
-                           :deadline (util/->sqldate deadline)})
-         (redirect "/"))
-   (POST "/add-book" [title]
-         (db/add db :book {:title title
-                           :done false})
-         (redirect "/"))
    (POST "/add-action-item" [desc goalid]
          (db/add db :actionitem {:goalid (util/parse-int goalid)
                                  :description desc})
          (redirect (str "/goal?id=" goalid)))
+   (POST "/add/:kind" [kind title desc deadline goalid]
+         (case kind
+           :book (db/add db :book {:title title
+                                   :done false})
+           :goal (db/add db :goal {:description desc
+                                   :deadline (util/->sqldate deadline)}))
+         (redirect "/"))
    (POST "/add-task/:kind" [kind desc current target unit goalid iterationid actionitemid page]
          (let [extras (filter-vals some? {:unit unit
                                           :target (util/parse-int target)

@@ -70,7 +70,8 @@
 (defn current-iteration [db]
   (let [now (util/->sqldate (time/now))]
     (if-let [iteration
-             (first (j/query db
+             (first (j/query db ["select * from iteration where id = 17"])) ;; TODO remove
+             #_(first (j/query db
                              [(str "SELECT * FROM iteration where ? >= startdate and ? <= enddate") now now]))]
       iteration
       (throw+ {:type ::no-current-iteration}))))

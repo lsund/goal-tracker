@@ -25,7 +25,7 @@
           "Books"
           [:div
            [:h2 "Add book"]
-           (form-to [:post "/add-book"]
+           (form-to [:post "/add/book"]
                     [:input {:name "title" :type :text :placeholder "Book Title" :required "true"}])
            [:ul
             (for [book books]
@@ -226,7 +226,7 @@
            [:h1 "Helper"]
            [:p "This is a tool for personal development"]
            [:h2 "Add new goal"]
-           (form-to [:post "/add-goal"]
+           (form-to [:post "/add/goal"]
                     [:input {:name "desc"
                              :type :text
                              :placeholder "Goal Description"
