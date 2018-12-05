@@ -28,9 +28,22 @@
            [:h2 "Add book"]
            (form-to [:post "/add/book"]
                     [:input {:type :text :name "desc" :placeholder "Book Title" :required "true"}])
-           [:ul
-            (for [book books]
-              [:li (:title book)])]]))
+           [:table
+            [:thead
+             [:tr
+              [:th "Title"]
+              [:th "Toggle done"]]]
+            [:tbody
+             [:tbody
+              (for [book books]
+                [:tr {:class (if (:done book) "green" "")}
+                 [:td (:title book)]
+                 [:td (form-to [:post "/toggle-done/book"]
+                               [:input {:type :submit :value "+"}]
+                               [:input {:type :hidden :name "id" :value (:id book)}]
+                               [:input {:type :hidden
+                                        :name "url"
+                                        :value "/books"}])]])]]]]))
 
 (defn- make-query-url
   ([base m]
@@ -111,7 +124,13 @@
               [:th "Up priority"]
               [:th "Down priority"]]]
             [:tbody
-             (for [{:keys [sequence priority id description current target unit]} (sort-by :description incremental-tasks)]
+             (for [{:keys [sequence
+                           priority
+                           id
+                           description
+                           current
+                           target
+                           unit]} (sort-by :description incremental-tasks)]
                [:tr {:class (if (<= target current) "green" "")}
                 [:td sequence]
                 [:td priority]
@@ -158,7 +177,6 @@
                 [:td description]
                 [:td (form-to [:post "/toggle-done/checkedtask"]
                               [:input {:type :submit :value "+"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}]
                               [:input {:type :hidden
                                        :name "url"
@@ -200,7 +218,6 @@
                 [:td page]
                 [:td (form-to [:post "/toggle-done/readingtask"]
                               [:input {:type :submit :value "+"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}]
                               [:input {:type :hidden
                                        :name "url"

@@ -60,19 +60,26 @@
                     " + 1 WHERE id=?") id])
   (add db :taskupdate {:taskid id :tasktype 1 :day (util/->sqldate (time/now))}))
 
+(def taskname->tasktype
+  {:checkedtask 2
+   :readingtask 3})
+
+(defn- add-taskupdate [db table id]
+  (add db :taskupdate {:taskid id
+                       :tasktype (taskname->tasktype table)
+                       :day (util/->sqldate (time/now))}))
+
 (defn toggle-done [db table id]
   (update db (keyword table) {:done true} id)
-  (let [tasktype (case table :checkedtask 2 :readingtask 3)]
-    (add db :taskupdate {:taskid id
-                         :tasktype tasktype
-                         :day (util/->sqldate (time/now))})))
+  (when (some #{(keyword table)} [:checkedtask :readingtask])
+    (add-taskupdate db table id)))
 
 (defn current-iteration [db]
   (let [now (util/->sqldate (time/now))]
     (if-let [iteration
              (first (j/query db ["select * from iteration where id = 17"])) ;; TODO remove
              #_(first (j/query db
-                             [(str "SELECT * FROM iteration where ? >= startdate and ? <= enddate") now now]))]
+                               [(str "SELECT * FROM iteration where ? >= startdate and ? <= enddate") now now]))]
       iteration
       (throw+ {:type ::no-current-iteration}))))
 
