@@ -1,46 +1,10 @@
-(ns helper.db
-  "Namespace for database interfacing"
+(ns helper.db.query
   (:require [clojure.java.jdbc :as j]
             [clj-time.core :as time]
-            [com.stuartsierra.component :as c]
-            [taoensso.timbre :as timbre]
             [helper.util :as util]
-            [helper.config :as config]
             [slingshot.slingshot :refer [throw+]]))
 
-
-(defn pg-db [config]
-  {:dbtype "postgresql"
-   :dbname (:name config)
-   :user "postgres"})
-
-(def pg-db-val (pg-db {:name "helper"}))
-
-(defrecord Db [db db-config]
-  c/Lifecycle
-
-  (start [component]
-    (println ";; [Db] Starting database")
-    (assoc component :db (pg-db db-config)))
-
-  (stop [component]
-    (println ";; [Db] Stopping database")
-    component))
-
-(defn new-db
-  [config]
-  (map->Db {:db-config config}))
-
-(defn add [db table row]
-  (j/insert! db table row))
-
-(defn all [db table]
-  (j/query db [(str "SELECT * FROM " (name table))]))
-
-(defn update [db table update-map id]
-  (j/update! db table update-map ["id=?" id]))
-
-(defn element [db table id]
+(defn row [db table id]
   (first (j/query db [(str "SELECT * FROM " (name table) " WHERE id=?") id])))
 
 (defn all [db table]
@@ -48,31 +12,6 @@
 
 (defn all-where [db table clause]
   (j/query db [(str "SELECT * FROM " (name table) " WHERE " clause)]))
-
-(defn increment [db table column id]
-  (j/execute! db
-              [(str "UPDATE "
-                    (name table)
-                    " SET "
-                    (name column)
-                    " = "
-                    (name column)
-                    " + 1 WHERE id=?") id])
-  (add db :taskupdate {:taskid id :tasktype 1 :day (util/->sqldate (time/now))}))
-
-(def taskname->tasktype
-  {:checkedtask 2
-   :readingtask 3})
-
-(defn- add-taskupdate [db table id]
-  (add db :taskupdate {:taskid id
-                       :tasktype (taskname->tasktype table)
-                       :day (util/->sqldate (time/now))}))
-
-(defn toggle-done [db table id]
-  (update db (keyword table) {:done true} id)
-  (when (some #{(keyword table)} [:checkedtask :readingtask])
-    (add-taskupdate db table id)))
 
 (defn current-iteration [db]
   (let [now (util/->sqldate (time/now))]
@@ -100,31 +39,6 @@
                      iterationid
                      iterationid
                      iterationid])))
-
-(defn tweak-priority [db table id op]
-  (let [f (if (= op :up) util/pred util/succ)
-        nxt (some-> db
-                    (j/query [(str "SELECT priority from " (name table) " where id = ?") id])
-                    first
-                    :priority
-                    first
-                    f)]
-    (if-not nxt
-      (case op
-        :up (update db table {:priority "A"} id)
-        :down (update db table {:priority "C"} id))
-      (when (and nxt (apply <= (map int [\A nxt \C])))
-        (update db table {:priority (str nxt)} id)))))
-
-(defn tweak-sequence [db table id op]
-  (let [f (if (= op :up) util/pred util/succ)
-        nxt (some-> db
-                    (j/query [(str "SELECT sequence from " (name table) " where id = ?") id])
-                    first
-                    :sequence
-                    f)]
-    (when (and nxt (< 0 nxt))
-      (update db table {:sequence nxt} id))))
 
 (defmulti task-log
   (fn [params] (:kind params)))

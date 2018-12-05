@@ -3,7 +3,6 @@
   (:require
    [clojure.string :as string]
    [medley.core :refer [find-first]]
-   [helper.db :as db]
    [taoensso.timbre :as logging]
    [hiccup.form :refer [form-to]]
    [hiccup.page :refer [html5 include-css include-js]]
@@ -32,7 +31,7 @@
             [:thead
              [:tr
               [:th "Title"]
-              [:th "Toggle done"]]]
+              [:th "Toggle Done"]]]
             [:tbody
              [:tbody
               (for [book books]
@@ -164,7 +163,7 @@
               [:th "sequence"]
               [:th "Priority"]
               [:th "Description"]
-              [:th "Mark as Done"]
+              [:th "Toggle Done"]
               [:th "sequence up"]
               [:th "sequence Down"]
               [:th "Up priority"]
@@ -204,7 +203,7 @@
               [:th "Priority"]
               [:th "Title"]
               [:th "Page"]
-              [:th "Mark as Done"]
+              [:th "Toggle Done"]
               [:th "sequence up"]
               [:th "sequence Down"]
               [:th "Up Priority"]

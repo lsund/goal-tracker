@@ -4,7 +4,7 @@
    [com.stuartsierra.component :as c]
    [helper.app :as app]
    [helper.server :as server]
-   [helper.db :as db]))
+   [helper.db.core :as db]))
 
 (defn new-system
   [config]
