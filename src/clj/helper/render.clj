@@ -1,6 +1,7 @@
 (ns helper.render
   "Namespace for rendering hiccup"
   (:require
+   [clojure.string :as string]
    [medley.core :refer [find-first]]
    [helper.db :as db]
    [taoensso.timbre :as logging]
@@ -26,10 +27,16 @@
           [:div
            [:h2 "Add book"]
            (form-to [:post "/add/book"]
-                    [:input {:name "title" :type :text :placeholder "Book Title" :required "true"}])
+                    [:input {:type :text :name "desc" :placeholder "Book Title" :required "true"}])
            [:ul
             (for [book books]
               [:li (:title book)])]]))
+
+(defn- make-query-url
+  ([base m]
+   (make-query-url base m (keys m)))
+  ([base m ks]
+   (str base "?" (string/join "&" (for [k ks] (if-let [v (m k)] (str (name k) "=" v) ""))))))
 
 (defn add-task-form [{:keys [kind goal current-iteration actionitems]} extra-inputs]
   (apply form-to
@@ -43,6 +50,7 @@
                            :name "desc"
                            :placeholder "Task Description"
                            :required "true"}]
+                  [:input {:type :hidden :name "url" :value (make-query-url "/goal" goal [:id])}]
                   [:input.hidden {:type :submit}]]
                  extra-inputs)))
 
@@ -64,7 +72,7 @@
 (defmethod add-task :readingtask [params]
   [:div
    [:h2 (str "Add new reading task")]
-   (add-task-form params [[:input {:type :number :name "page" :required "true"}]])])
+   (add-task-form params [[:input {:type :number :name "target" :required "true"}]])])
 
 (defn goal [config {:keys [goal current-iteration actionitems books incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
@@ -72,12 +80,13 @@
           [:div
            [:h1 (:description goal)]
            [:h2 "Add action item"]
-           (form-to [:post "/add-action-item"]
+           (form-to [:post "/add/actionitem"]
                     [:input {:type :text
                              :name "desc"
                              :placeholder "Action Item Description"
                              :required "true"}]
-                    [:input {:name "goalid" :type :hidden :value (:id goal)}])
+                    [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                    [:input {:type :hidden :name "url" :value (make-query-url "/goal" goal [:id])}])
            [:ul
             (for [item actionitems]
               [:li (str (:description item))])]
@@ -147,7 +156,7 @@
                 [:td sequence]
                 [:td priority]
                 [:td description]
-                [:td (form-to [:post "/mark-as-done/checkedtask"]
+                [:td (form-to [:post "/toggle-done/checkedtask"]
                               [:input {:type :submit :value "+"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}])]
@@ -186,7 +195,7 @@
                 [:td priority]
                 [:td (:title (find-first #(= (:id %) bookid) books))]
                 [:td page]
-                [:td (form-to [:post "/mark-as-done/readingtask"]
+                [:td (form-to [:post "/toggle-done/readingtask"]
                               [:input {:type :submit :value "+"}]
                               [:input {:type :hidden :name "goalid" :value (:id goal)}]
                               [:input {:type :hidden :name "id" :value id}])]

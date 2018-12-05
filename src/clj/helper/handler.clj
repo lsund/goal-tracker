@@ -76,22 +76,21 @@
                                :books (db/all db :book)}))))
    (GET "/books" []
         (render/books config (db/all db :book)))
-   (POST "/add-action-item" [desc goalid]
-         (db/add db :actionitem {:goalid (util/parse-int goalid)
-                                 :description desc})
-         (redirect (str "/goal?id=" goalid)))
-   (POST "/add/:kind" [kind title desc deadline goalid]
+   (POST "/add/:kind" [kind desc deadline goalid url]
          (case kind
-           :book (db/add db :book {:title title
+           :book (db/add db :book {:title desc
                                    :done false})
            :goal (db/add db :goal {:description desc
-                                   :deadline (util/->sqldate deadline)}))
-         (redirect "/"))
-   (POST "/add-task/:kind" [kind desc current target unit goalid iterationid actionitemid page]
+                                   :deadline (util/->sqldate deadline)})
+           :actionitem (db/add db :actionitem {:goalid (util/parse-int goalid)
+                                               :description desc}))
+         (if url
+           (redirect url)
+           (redirect "/")))
+   (POST "/add-task/:kind" [kind desc current target unit goalid iterationid actionitemid url]
          (let [extras (filter-vals some? {:unit unit
                                           :target (util/parse-int target)
                                           :done false
-                                          :page (util/parse-int page)
                                           :current (util/parse-int current)})
                commons {:goalid (util/parse-int goalid)
                         :actionitemid (util/parse-int actionitemid)
@@ -100,12 +99,12 @@
            (db/add db
                    (keyword kind)
                    (merge commons extras)))
-         (redirect (str "/goal?id=" goalid)))
+         (redirect url))
    (POST "/increment-task" [id goalid]
          (db/increment db :incrementaltask :current (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
-   (POST "/mark-as-done/:table" [table id goalid]
-         (db/mark-as-done db (keyword table) (util/parse-int id))
+   (POST "/toggle-done/:table" [table id goalid]
+         (db/toggle-done db (keyword table) (util/parse-int id))
          (redirect (str "/goal?id=" goalid)))
    (POST "/tweak-sequence/:op/:table" [op table id goalid]
          (db/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))

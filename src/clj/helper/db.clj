@@ -60,7 +60,7 @@
                     " + 1 WHERE id=?") id])
   (add db :taskupdate {:taskid id :tasktype 1 :day (util/->sqldate (time/now))}))
 
-(defn mark-as-done [db table id]
+(defn toggle-done [db table id]
   (update db (keyword table) {:done true} id)
   (let [tasktype (case table :checkedtask 2 :readingtask 3)]
     (add db :taskupdate {:taskid id
