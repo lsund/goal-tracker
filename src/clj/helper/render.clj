@@ -103,7 +103,7 @@
              [:h2 (str "No current iteration")])
 
            [:h3 "Incremental tasks"]
-           (html/incrementaltask-table goal incremental-tasks)
+           (html/table :incrementaltask goal incremental-tasks ["Current" "Target" "Unit"])
            [:h3 "Checked tasks"]
            (html/checkedtask-table goal checked-tasks)
            [:h3 "Reading tasks"]

@@ -38,9 +38,26 @@
             [:th "Toggle"]]
            (map #(conj [:th] %) extra-rows))])
 
-(defn incrementaltask-table [goal incremental-tasks]
+(defn make-tablebody [goal tasks & extra-keys]
+
+  [:tbody
+   (for [{:keys [sequence priority id description] :as task} (sort-by :description tasks)]
+     (let [extra-rows (for [k extra-keys] (get task k))]
+       ;; TODO class "green" check is currently missing (fix for this?)
+       (concat  [:tr
+                 [:td sequence]
+                 [:td (button-form :sort :up type (:id goal) id)]
+                 [:td (button-form :sort :down type (:id goal) id)]
+                 [:td priority]
+                 [:td (button-form :prioritize :up type (:id goal) id)]
+                 [:td (button-form :prioritize :down type (:id goal) id)]
+                 [:td description]
+                 [:td (button-form :nudge :at type (:id goal) id)]]
+                (map #(conj [:td] %) extra-rows))))])
+
+(defn table [type goal tasks extra-rows]
   [:table
-   (make-tablehead "Current" "Target" "Unit")
+   (apply make-tablehead extra-rows)
    [:tbody
     (for [{:keys [sequence
                   priority
@@ -48,16 +65,16 @@
                   description
                   current
                   target
-                  unit]} (sort-by :description incremental-tasks)]
+                  unit]} (sort-by :description tasks)]
       [:tr {:class (if (<= target current) "green" "")}
        [:td sequence]
-       [:td (button-form :sort :up :incrementaltask (:id goal) id)]
-       [:td (button-form :sort :down :incrementaltask (:id goal) id)]
+       [:td (button-form :sort :up type (:id goal) id)]
+       [:td (button-form :sort :down type (:id goal) id)]
        [:td priority]
-       [:td (button-form :prioritize :up :incrementaltask (:id goal) id)]
-       [:td (button-form :prioritize :down :incrementaltask (:id goal) id)]
+       [:td (button-form :prioritize :up type (:id goal) id)]
+       [:td (button-form :prioritize :down type (:id goal) id)]
        [:td description]
-       [:td (button-form :nudge :at :incrementaltask (:id goal) id)]
+       [:td (button-form :nudge :at type (:id goal) id)]
        [:td current]
        [:td target]
        [:td unit]])]])
