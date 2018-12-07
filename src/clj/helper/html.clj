@@ -23,24 +23,24 @@
            [:input {:type :hidden :name "id" :value id}]
            [:input {:type :hidden
                     :name "url"
-                    ;; todo strange map
                     :value (util/make-query-url "/goal" {:id goalid})}]))
+
+(defn make-tablehead [& extra-rows]
+  [:thead
+   (concat [:tr
+            [:th "Sequence"]
+            [:th "Sequence Up"]
+            [:th "Sequence Down"]
+            [:th "Priority"]
+            [:th "Up priority"]
+            [:th "Down priority"]
+            [:th "Description"]
+            [:th "Toggle"]]
+           (map #(conj [:th] %) extra-rows))])
 
 (defn incrementaltask-table [goal incremental-tasks]
   [:table
-   [:thead
-    [:tr
-     [:th "Sequence"]
-     [:th "Sequence Up"]
-     [:th "Sequence Down"]
-     [:th "Priority"]
-     [:th "Up priority"]
-     [:th "Down priority"]
-     [:th "Description"]
-     [:th "Current"]
-     [:th "Target"]
-     [:th "Unit"]
-     [:th "Toggle"]]]
+   (make-tablehead "Current" "Target" "Unit")
    [:tbody
     (for [{:keys [sequence
                   priority
@@ -57,23 +57,14 @@
        [:td (button-form :prioritize :up :incrementaltask (:id goal) id)]
        [:td (button-form :prioritize :down :incrementaltask (:id goal) id)]
        [:td description]
+       [:td (button-form :nudge :at :incrementaltask (:id goal) id)]
        [:td current]
        [:td target]
-       [:td unit]
-       [:td (button-form :nudge :at :incrementaltask (:id goal) id)]])]])
+       [:td unit]])]])
 
 (defn checkedtask-table [goal checked-tasks]
   [:table
-   [:thead
-    [:tr
-     [:th "Sequence"]
-     [:th "sequence up"]
-     [:th "sequence Down"]
-     [:th "Priority"]
-     [:th "Up priority"]
-     [:th "Down priority"]
-     [:th "Description"]
-     [:th "Toggle"]]]
+   (make-tablehead)
    [:tbody
     (for [{:keys [sequence id priority description done]} checked-tasks]
       [:tr {:class (if done "green" "")}
@@ -90,16 +81,7 @@
 (defn readingtask-table [goal reading-tasks books]
   [:table
    [:thead
-    [:tr
-     [:th "Sequence"]
-     [:th "sequence up"]
-     [:th "sequence Down"]
-     [:th "Priority"]
-     [:th "Up Priority"]
-     [:th "Down Priority"]
-     [:th "Description"]
-     [:th "Target"]
-     [:th "Toggle"]]]
+    (make-tablehead "Target Page")]
    [:tbody
     (for [{:keys [sequence id priority bookid page done]} reading-tasks]
       [:tr {:class (if done "green" "")}
@@ -110,5 +92,5 @@
        [:td (button-form :prioritize :up :readingtask (:id goal) id)]
        [:td (button-form :prioritize :down :readingtask (:id goal) id)]
        [:td (:title (find-first #(= (:id %) bookid) books))]
-       [:td page]
-       [:td (button-form :nudge :at :readingtask (:id goal) id)]])]])
+       [:td (button-form :nudge :at :readingtask (:id goal) id)]
+       [:td page]])]])
