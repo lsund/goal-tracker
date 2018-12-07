@@ -2,7 +2,6 @@
   "Namespace for rendering hiccup"
   (:require
    [clojure.string :as string]
-   [medley.core :refer [find-first]]
    [taoensso.timbre :as logging]
    [hiccup.form :refer [form-to]]
    [hiccup.page :refer [html5 include-css include-js]]
@@ -44,12 +43,6 @@
                                         :name "url"
                                         :value "/books"}])]])]]]]))
 
-(defn- make-query-url
-  ([base m]
-   (make-query-url base m (keys m)))
-  ([base m ks]
-   (str base "?" (string/join "&" (for [k ks] (if-let [v (m k)] (str (name k) "=" v) ""))))))
-
 (defn add-task-form [{:keys [kind goal current-iteration actionitems]} extra-inputs]
   (apply form-to
          (concat [[:post (str "/add-task/" (name kind))]
@@ -62,7 +55,7 @@
                            :name "desc"
                            :placeholder "Task Description"
                            :required "true"}]
-                  [:input {:type :hidden :name "url" :value (make-query-url "/goal" goal [:id])}]
+                  [:input {:type :hidden :name "url" :value (util/make-query-url "/goal" goal [:id])}]
                   [:input.hidden {:type :submit}]]
                  extra-inputs)))
 
@@ -98,7 +91,7 @@
                              :placeholder "Action Item Description"
                              :required "true"}]
                     [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                    [:input {:type :hidden :name "url" :value (make-query-url "/goal" goal [:id])}])
+                    [:input {:type :hidden :name "url" :value (util/make-query-url "/goal" goal [:id])}])
            [:ul
             (for [item actionitems]
               [:li (str (:description item))])]
@@ -108,135 +101,15 @@
            (if current-iteration
              [:h2 (str "Current iteration: " (:startdate current-iteration) " to " (:enddate current-iteration))]
              [:h2 (str "No current iteration")])
-           [:table
-            [:thead
-             [:tr
-              [:th "sequence"]
-              [:th "Priority"]
-              [:th "Description"]
-              [:th "Current"]
-              [:th "Target"]
-              [:th "Unit"]
-              [:th "Increment"]
-              [:th "sequence up"]
-              [:th "sequence Down"]
-              [:th "Up priority"]
-              [:th "Down priority"]]]
-            [:tbody
-             (for [{:keys [sequence
-                           priority
-                           id
-                           description
-                           current
-                           target
-                           unit]} (sort-by :description incremental-tasks)]
-               [:tr {:class (if (<= target current) "green" "")}
-                [:td sequence]
-                [:td priority]
-                [:td description]
-                [:td current]
-                [:td target]
-                [:td unit]
-                [:td (form-to [:post "/increment-task"]
-                              [:input {:type :submit :value "+"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/sort/up/incrementaltask"]
-                              [:input {:type :submit :value "^"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/sort/down/incrementaltask"]
-                              [:input {:type :submit :value "v"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/prioritise/up/incrementaltask"]
-                              [:input {:type :submit :value "^"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/prioritise/down/incrementaltask"]
-                              [:input {:type :submit :value "v"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]])]]
-           [:table
-            [:thead
-             [:tr
-              [:th "sequence"]
-              [:th "Priority"]
-              [:th "Description"]
-              [:th "Toggle Done"]
-              [:th "sequence up"]
-              [:th "sequence Down"]
-              [:th "Up priority"]
-              [:th "Down priority"]]]
-            [:tbody
-             (for [{:keys [sequence id priority description done]} checked-tasks]
-               [:tr {:class (if done "green" "")}
-                [:td sequence]
-                [:td priority]
-                [:td description]
-                [:td (form-to [:post "/toggle-done/checkedtask"]
-                              [:input {:type :submit :value "+"}]
-                              [:input {:type :hidden :name "id" :value id}]
-                              [:input {:type :hidden
-                                       :name "url"
-                                       :value (make-query-url "/goal" goal [:id])}])]
-                [:td (form-to [:post "/tweak-sequence/up/checkedtask"]
-                              [:input {:type :submit :value "^"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/tweak-sequence/down/checkedtask"]
-                              [:input {:type :submit :value "v"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/tweak-priority/up/checkedtask"]
-                              [:input {:type :submit :value "^"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/tweak-priority/down/checkedtask"]
-                              [:input {:type :submit :value "v"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]])]]
-           [:table
-            [:thead
-             [:tr
-              [:th "Sequence"]
-              [:th "Priority"]
-              [:th "Title"]
-              [:th "Page"]
-              [:th "Toggle Done"]
-              [:th "sequence up"]
-              [:th "sequence Down"]
-              [:th "Up Priority"]
-              [:th "Down Priority"]]]
-            [:tbody
-             (for [{:keys [sequence id priority bookid page done]} reading-tasks]
-               [:tr {:class (if done "green" "")}
-                [:td sequence]
-                [:td priority]
-                [:td (:title (find-first #(= (:id %) bookid) books))]
-                [:td page]
-                [:td (form-to [:post "/toggle-done/readingtask"]
-                              [:input {:type :submit :value "+"}]
-                              [:input {:type :hidden :name "id" :value id}]
-                              [:input {:type :hidden
-                                       :name "url"
-                                       :value (make-query-url "/goal" goal [:id])}])]
-                [:td (form-to [:post "/tweak-sequence/up/readingtask"]
-                              [:input {:type :submit :value "^"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/tweak-sequence/down/readingtask"]
-                              [:input {:type :submit :value "v"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/tweak-priority/up/readingtask"]
-                              [:input {:type :submit :value "^"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]
-                [:td (form-to [:post "/tweak-priority/down/readingtask"]
-                              [:input {:type :submit :value "v"}]
-                              [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                              [:input {:type :hidden :name "id" :value id}])]])]]
+
+           [:h3 "Incremental tasks"]
+           (html/incrementaltask-table goal incremental-tasks)
+           [:h3 "Checked tasks"]
+           (html/checkedtask-table goal checked-tasks)
+           [:h3 "Reading tasks"]
+           (html/readingtask-table goal reading-tasks books)
+
+
            [:h3 "Updated incremental tasks"]
            [:ul
             (for [{:keys [description day]} (:incremental-task-log params)]

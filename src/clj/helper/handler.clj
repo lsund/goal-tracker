@@ -31,21 +31,21 @@
 (defn- all-tasks [db iterationid goalid]
   (map-vals (partial sort-by :sequence)
             {:incremental-tasks (read/all-where db
-                                                 :incrementaltask
-                                                 (str "iterationid="
-                                                      iterationid
-                                                      " and goalid="
-                                                      goalid))
+                                                :incrementaltask
+                                                (str "iterationid="
+                                                     iterationid
+                                                     " and goalid="
+                                                     goalid))
              :checked-tasks (read/all-where db
-                                             :checkedtask
-                                             (str "iterationid="
-                                                  iterationid
-                                                  " and goalid="
-                                                  goalid))
+                                            :checkedtask
+                                            (str "iterationid="
+                                                 iterationid
+                                                 " and goalid="
+                                                 goalid))
              :reading-tasks (read/all-where db :readingtask (str "iterationid="
-                                                                  iterationid
-                                                                  " and goalid="
-                                                                  goalid))}))
+                                                                 iterationid
+                                                                 " and goalid="
+                                                                 goalid))}))
 
 (defn- all-logs [db iterationid goalid]
   (let [params {:db db
@@ -62,8 +62,8 @@
         (render/index config
                       (read/all db :goal)
                       (read/done-goal-ids db (if iteration-id
-                                                (util/parse-int iteration-id)
-                                                (:id (read/current-iteration db))))))
+                                               (util/parse-int iteration-id)
+                                               (:id (read/current-iteration db))))))
    (GET "/goal" [id]
         (let [current-iteration (read/current-iteration db)
               goalid (util/parse-int id)]
@@ -73,8 +73,8 @@
                               {:goal (read/row db :goal (util/parse-int id))
                                :current-iteration current-iteration
                                :actionitems (read/all-where db
-                                                             :actionitem
-                                                             (str "goalid=" goalid))
+                                                            :actionitem
+                                                            (str "goalid=" goalid))
                                :books (read/all db :book)}))))
    (GET "/books" []
         (render/books config (read/all db :book)))
@@ -102,11 +102,10 @@
                        (keyword kind)
                        (merge commons extras)))
          (redirect url))
-   (POST "/increment-task" [id goalid]
-         (update/increment db :incrementaltask :current (util/parse-int id))
-         (redirect (str "/goal?id=" goalid)))
-   (POST "/toggle-done/:table" [table id url]
-         (update/toggle-done db (keyword table) (util/parse-int id))
+   (POST "/nudge/:table" [table id url]
+         (if (= (keyword table) :incrementaltask)
+           (update/increment db (keyword table) :current (util/parse-int id))
+           (update/toggle-done db (keyword table) (util/parse-int id)))
          (redirect url))
    (POST "/sort/:op/:table" [op table id goalid]
          (update/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))

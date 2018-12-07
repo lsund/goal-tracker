@@ -1,6 +1,6 @@
 (ns helper.util
   "Namespace for utilities"
-  (:require [clojure.string :as s]
+  (:require [clojure.string :as string]
             [clj-time.format :as time.format]))
 
 (defn stringify [k] (-> k name s/capitalize))
@@ -26,3 +26,9 @@
   (condp = (type x)
     java.lang.Character (-> x int dec char)
     java.lang.Integer (dec x)))
+
+(defn make-query-url
+  ([base m]
+   (make-query-url base m (keys m)))
+  ([base m ks]
+   (str base "?" (string/join "&" (for [k ks] (if-let [v (m k)] (str (name k) "=" v) ""))))))
