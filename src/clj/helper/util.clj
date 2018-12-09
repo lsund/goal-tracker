@@ -3,7 +3,7 @@
   (:require [clojure.string :as string]
             [clj-time.format :as time.format]))
 
-(defn stringify [k] (-> k name s/capitalize))
+(defn stringify [k] (-> k name string/capitalize))
 
 (defn parse-int [s]
   (when s

@@ -1,9 +1,9 @@
 (ns helper.html
   "Namespace for HTML components"
-  (:require
-   [hiccup.form :refer [form-to]]
-   [helper.util :as util]
-   [medley.core :refer [find-first]]))
+  (:require [clojure.string :as string]
+            [hiccup.form :refer [form-to]]
+            [helper.util :as util]
+            [medley.core :refer [find-first]]))
 
 (defn navbar []
   [:div.mui-appbar
@@ -27,87 +27,33 @@
 
 (defn make-tablehead [& extra-rows]
   [:thead
-   (concat [:tr
-            [:th "Sequence"]
-            [:th "Sequence Up"]
-            [:th "Sequence Down"]
-            [:th "Priority"]
-            [:th "Up priority"]
-            [:th "Down priority"]
-            [:th "Description"]
-            [:th "Toggle"]]
-           (map #(conj [:th] %) extra-rows))])
+   (vec (concat [:tr
+                 [:th "Sequence"]
+                 [:th "Sequence Up"]
+                 [:th "Sequence Down"]
+                 [:th "Priority"]
+                 [:th "Up priority"]
+                 [:th "Down priority"]
+                 [:th "Description"]
+                 [:th "Toggle"]]
+                (map #(conj [:th] %) extra-rows)))])
 
-(defn make-tablebody [goal tasks & extra-keys]
-
+(defn make-tablebody [type goal tasks done-test & extra-keys]
   [:tbody
-   (for [{:keys [sequence priority id description] :as task} (sort-by :description tasks)]
+   (for [{:keys [sequence priority id description] :as task} (sort-by :sequence tasks)]
      (let [extra-rows (for [k extra-keys] (get task k))]
-       ;; TODO class "green" check is currently missing (fix for this?)
-       (concat  [:tr
-                 [:td sequence]
-                 [:td (button-form :sort :up type (:id goal) id)]
-                 [:td (button-form :sort :down type (:id goal) id)]
-                 [:td priority]
-                 [:td (button-form :prioritize :up type (:id goal) id)]
-                 [:td (button-form :prioritize :down type (:id goal) id)]
-                 [:td description]
-                 [:td (button-form :nudge :at type (:id goal) id)]]
-                (map #(conj [:td] %) extra-rows))))])
+       (vec (concat  [:tr {:class (when (done-test task) "green")}
+                      [:td sequence]
+                      [:td (button-form :sort :up type (:id goal) id)]
+                      [:td (button-form :sort :down type (:id goal) id)]
+                      [:td priority]
+                      [:td (button-form :prioritize :up type (:id goal) id)]
+                      [:td (button-form :prioritize :down type (:id goal) id)]
+                      [:td description]
+                      [:td (button-form :nudge :at type (:id goal) id)]]
+                     (map #(conj [:td] %) extra-rows)))))])
 
-(defn table [type goal tasks extra-rows]
+(defn table [type goal tasks done-test & extra-keys]
   [:table
-   (apply make-tablehead extra-rows)
-   [:tbody
-    (for [{:keys [sequence
-                  priority
-                  id
-                  description
-                  current
-                  target
-                  unit]} (sort-by :description tasks)]
-      [:tr {:class (if (<= target current) "green" "")}
-       [:td sequence]
-       [:td (button-form :sort :up type (:id goal) id)]
-       [:td (button-form :sort :down type (:id goal) id)]
-       [:td priority]
-       [:td (button-form :prioritize :up type (:id goal) id)]
-       [:td (button-form :prioritize :down type (:id goal) id)]
-       [:td description]
-       [:td (button-form :nudge :at type (:id goal) id)]
-       [:td current]
-       [:td target]
-       [:td unit]])]])
-
-(defn checkedtask-table [goal checked-tasks]
-  [:table
-   (make-tablehead)
-   [:tbody
-    (for [{:keys [sequence id priority description done]} checked-tasks]
-      [:tr {:class (if done "green" "")}
-       [:td sequence]
-       [:td (button-form :sort :up :checkedtask (:id goal) id)]
-       [:td (button-form :sort :down :checkedtask (:id goal) id)]
-       [:td priority]
-       [:td (button-form :prioritize :up :checkedtask (:id goal) id)]
-       [:td (button-form :prioritize :down :checkedtask (:id goal) id)]
-       [:td description]
-       [:td (button-form :nudge :at :checkedtask (:id goal) id)]])]])
-
-
-(defn readingtask-table [goal reading-tasks books]
-  [:table
-   [:thead
-    (make-tablehead "Target Page")]
-   [:tbody
-    (for [{:keys [sequence id priority bookid page done]} reading-tasks]
-      [:tr {:class (if done "green" "")}
-       [:td sequence]
-       [:td (button-form :sort :up :readingtask (:id goal) id)]
-       [:td (button-form :sort :down :readingtask (:id goal) id)]
-       [:td priority]
-       [:td (button-form :prioritize :up :readingtask (:id goal) id)]
-       [:td (button-form :prioritize :down :readingtask (:id goal) id)]
-       [:td (:title (find-first #(= (:id %) bookid) books))]
-       [:td (button-form :nudge :at :readingtask (:id goal) id)]
-       [:td page]])]])
+   (apply make-tablehead (map (comp string/capitalize name) extra-keys))
+   (apply (partial make-tablebody type goal tasks done-test) extra-keys)])

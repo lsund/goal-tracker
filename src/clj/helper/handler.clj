@@ -42,10 +42,7 @@
                                                  iterationid
                                                  " and goalid="
                                                  goalid))
-             :reading-tasks (read/all-where db :readingtask (str "iterationid="
-                                                                 iterationid
-                                                                 " and goalid="
-                                                                 goalid))}))
+             :reading-tasks (read/all-reading-tasks db goalid iterationid)}))
 
 (defn- all-logs [db iterationid goalid]
   (let [params {:db db
@@ -74,8 +71,7 @@
                                :current-iteration current-iteration
                                :actionitems (read/all-where db
                                                             :actionitem
-                                                            (str "goalid=" goalid))
-                               :books (read/all db :book)}))))
+                                                            (str "goalid=" goalid))}))))
    (GET "/books" []
         (render/books config (read/all db :book)))
    (POST "/add/:kind" [kind desc deadline goalid url]
@@ -102,7 +98,7 @@
                        (keyword kind)
                        (merge commons extras)))
          (redirect url))
-   (POST "/nudge/:table" [table id url]
+   (POST "/nudge/at/:table" [table id url]
          (if (= (keyword table) :incrementaltask)
            (update/increment db (keyword table) :current (util/parse-int id))
            (update/toggle-done db (keyword table) (util/parse-int id)))
@@ -110,7 +106,7 @@
    (POST "/sort/:op/:table" [op table id goalid]
          (update/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
-   (POST "/prioritise/:op/:table" [op table id goalid]
+   (POST "/prioritize/:op/:table" [op table id goalid]
          (update/tweak-priority db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
    (r/resources "/")

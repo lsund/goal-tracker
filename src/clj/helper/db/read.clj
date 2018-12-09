@@ -28,6 +28,13 @@
       iteration
       (throw+ {:type ::no-current-iteration}))))
 
+(defn all-reading-tasks [db goalid iterationid]
+   (j/query db [ "SELECT readingtask.*, book.title as description
+                  FROM readingtask
+                  INNER JOIN book
+                  ON book.id = readingtask.bookid
+                  WHERE iterationid = ? AND goalid = ?" iterationid goalid]))
+
 (defn done-goal-ids [db iterationid]
   (map :id (j/query db
                     ["SELECT id FROM goal WHERE id NOT IN (

@@ -64,27 +64,27 @@
 
 (defmethod add-task :incrementaltask [params]
   [:div
-   [:h2 (str "Add new incremental task")]
+   [:h3 (str "Add new incremental task")]
    (add-task-form params [[:input {:type :number :name "target" :value 0 :required "true"}]
                           [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
                           [:input {:type :hidden :name "current" :value "0"}]])])
 
 (defmethod add-task :checkedtask [params]
   [:div
-   [:h2 (str "Add new checked task")]
+   [:h3 (str "Add new checked task")]
    (add-task-form params [])])
 
 (defmethod add-task :readingtask [params]
   [:div
-   [:h2 (str "Add new reading task")]
+   [:h3 (str "Add new reading task")]
    (add-task-form params [[:input {:type :number :name "target" :required "true"}]])])
 
-(defn goal [config {:keys [goal current-iteration actionitems books incremental-tasks checked-tasks reading-tasks] :as params}]
+(defn goal [config {:keys [goal current-iteration actionitems incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
           "Goal"
           [:div
-           [:h1 (:description goal)]
-           [:h2 "Add action item"]
+           [:h2 (:description goal)]
+           [:h3 "Add action item"]
            (form-to [:post "/add/actionitem"]
                     [:input {:type :text
                              :name "desc"
@@ -99,16 +99,28 @@
            (add-task (assoc params :kind :checkedtask))
            (add-task (assoc params :kind :readingtask))
            (if current-iteration
-             [:h2 (str "Current iteration: " (:startdate current-iteration) " to " (:enddate current-iteration))]
-             [:h2 (str "No current iteration")])
+             [:h3 (str "Current iteration: " (:startdate current-iteration) " to " (:enddate current-iteration))]
+             [:h3 (str "No current iteration")])
 
            [:h3 "Incremental tasks"]
-           (html/table :incrementaltask goal incremental-tasks ["Current" "Target" "Unit"])
+           (html/table :incrementaltask
+                       goal
+                       incremental-tasks
+                       (fn [task] (<= (:target task) (:current task)))
+                       :current
+                       :target
+                       :unit)
            [:h3 "Checked tasks"]
-           (html/checkedtask-table goal checked-tasks)
+           (html/table :checkedtask
+                       goal
+                       checked-tasks
+                       :done)
            [:h3 "Reading tasks"]
-           (html/readingtask-table goal reading-tasks books)
-
+           (html/table :readingtask
+                       goal
+                       reading-tasks
+                       :done
+                       :page)
 
            [:h3 "Updated incremental tasks"]
            [:ul
