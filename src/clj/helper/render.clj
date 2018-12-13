@@ -30,18 +30,20 @@
             [:thead
              [:tr
               [:th "Title"]
-              [:th "Toggle Done"]]]
+              [:th "Toggle Done"]
+              [:th "Done date"]]]
             [:tbody
              [:tbody
-              (for [book books]
-                [:tr {:class (if (:done book) "green" "")}
-                 [:td (:title book)]
-                 [:td (form-to [:post "/toggle-done/book"]
+              (for [{:keys [id title done donedate]} books]
+                [:tr {:class (if done "green" "")}
+                 [:td title]
+                 [:td (form-to [:post "/nudge/at/book"]
                                [:input {:type :submit :value "+"}]
-                               [:input {:type :hidden :name "id" :value (:id book)}]
+                               [:input {:type :hidden :name "id" :value id}]
                                [:input {:type :hidden
                                         :name "url"
-                                        :value "/books"}])]])]]]]))
+                                        :value "/books"}])]
+                 [:td donedate]])]]]]))
 
 (defn add-task-form [{:keys [kind goal current-iteration actionitems]} extra-inputs]
   (apply form-to

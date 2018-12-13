@@ -2,7 +2,8 @@ CREATE TABLE BOOK
 (
     id              SERIAL PRIMARY KEY,
     title           VARCHAR(64) NOT NULL,
-    done            BOOLEAN NOT NULL
+    done            BOOLEAN NOT NULL,
+    doneDate        DATE
 );
 
 CREATE TABLE Goal
@@ -77,7 +78,7 @@ CREATE TABLE ReadingTask
     FOREIGN KEY     (bookId) REFERENCES Book (id)
 );
 
-CREATE TABLE TaskUpdate
+CREATE TABLE DoneTaskEntry
 (
     id              SERIAL PRIMARY KEY,
     taskId          INT NOT NULL,

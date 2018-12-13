@@ -59,35 +59,35 @@
 
 (defmethod task-log :incremental [{:keys [db iterationid goalid]}]
   (j/query db
-           ["SELECT taskupdate.day, incrementaltask.description
-             FROM taskupdate
-             INNER JOIN incrementaltask ON taskupdate.taskid = incrementaltask.id
-             WHERE taskupdate.tasktype = 1
-             AND taskupdate.taskid IN
+           ["SELECT doneTaskEntry.day, incrementaltask.description
+             FROM doneTaskEntry
+             INNER JOIN incrementaltask ON doneTaskEntry.taskid = incrementaltask.id
+             WHERE doneTaskEntry.tasktype = 1
+             AND doneTaskEntry.taskid IN
                (SELECT id FROM incrementaltask WHERE iterationid = ? AND goalid = ?);"
             iterationid
             goalid]))
 
 (defmethod task-log :checked [{:keys [db goalid iterationid]}]
   (j/query db
-           ["SELECT taskupdate.day, checkedtask.description
-             FROM taskupdate
-             INNER JOIN checkedtask ON taskupdate.taskid = checkedtask.id
-             WHERE taskupdate.tasktype = 2
-             AND taskupdate.taskid IN
+           ["SELECT doneTaskEntry.day, checkedtask.description
+             FROM doneTaskEntry
+             INNER JOIN checkedtask ON doneTaskEntry.taskid = checkedtask.id
+             WHERE doneTaskEntry.tasktype = 2
+             AND doneTaskEntry.taskid IN
                (SELECT id FROM checkedtask WHERE iterationid = ? AND goalid = ?);"
             iterationid
             goalid]))
 
 (defmethod task-log :reading [{:keys [db goalid iterationid]}]
   (j/query db
-           ["SELECT taskupdate.day, book.title
-             FROM taskupdate
+           ["SELECT doneTaskEntry.day, book.title
+             FROM doneTaskEntry
              INNER JOIN readingtask
-             ON taskupdate.taskid = readingtask.id
+             ON doneTaskEntry.taskid = readingtask.id
              INNER JOIN book on book.id = readingtask.bookid
-             WHERE taskupdate.tasktype = 3
-             AND taskupdate.taskid IN
+             WHERE doneTaskEntry.tasktype = 3
+             AND doneTaskEntry.taskid IN
               (SELECT id FROM readingtask WHERE iterationid = ? AND goalid = ?)"
             iterationid
             goalid]))

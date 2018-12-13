@@ -73,7 +73,7 @@
                                                             :actionitem
                                                             (str "goalid=" goalid))}))))
    (GET "/books" []
-        (render/books config (read/all db :book)))
+        (render/books config (sort-by :done (read/all db :book))))
    (POST "/add/:kind" [kind desc deadline goalid url]
          (case (keyword kind)
            :book (create/row db :book {:title desc
@@ -99,9 +99,11 @@
                        (merge commons extras)))
          (redirect url))
    (POST "/nudge/at/:table" [table id url]
-         (if (= (keyword table) :incrementaltask)
-           (update/increment db (keyword table) :current (util/parse-int id))
-           (update/toggle-done db (keyword table) (util/parse-int id)))
+         (case (keyword table)
+           :incrementaltask (update/increment db (keyword table) :current (util/parse-int id))
+           :checkedtask (update/toggle-done-task db (keyword table) (util/parse-int id))
+           :readingtask (update/toggle-done-task db (keyword table) (util/parse-int id))
+           :book (update/toggle-done-book db (util/parse-int id)))
          (redirect url))
    (POST "/sort/:op/:table" [op table id goalid]
          (update/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))

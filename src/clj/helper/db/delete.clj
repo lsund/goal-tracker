@@ -6,7 +6,6 @@
   (j/delete! db table ["id=?" id]))
 
 (defn done-task-entry [db taskid]
-  (let [taskupdate-id (-> (read/all-where db :taskupdate (str "taskid=" taskid))
-                          first
-                          :id)]
-    (by-id db :taskid taskupdate-id)))
+  (by-id db :taskid (-> (read/all-where db :donetaskentry (str "taskid=" taskid))
+                        first
+                        :id)))
