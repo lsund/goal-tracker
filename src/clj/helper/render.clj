@@ -137,7 +137,7 @@
             (for [{:keys [title day]} (:reading-task-log params)]
               [:li (str title " " day)])]]))
 
-(defn index [config goals done-goal-ids]
+(defn index [config iteration goals done-goal-ids]
   (layout config
           "Overview"
           [:div
@@ -154,8 +154,8 @@
            [:ol
             (for [goal (sort-by :sequence goals)]
               [:li [:div {:class (if (some #{(:id goal)} done-goal-ids) "green" "")}
-                    [:a {:href (str "/goal?id=" (:id goal))} (str (:description goal)
-                                                                  " by "
-                                                                  (:deadline goal))]]])]]))
+                    [:a {:href (util/make-query-url "/goal" {:id (:id goal)
+                                                             :iteration-id (:id iteration)})}
+                     (str (:description goal) " by " (:deadline goal))]]])]]))
 
 (def not-found (html5 "not found"))

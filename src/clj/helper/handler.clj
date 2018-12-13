@@ -56,13 +56,17 @@
   [{:keys [db] :as config}]
   (routes
    (GET "/" [iteration-id]
-        (render/index config
-                      (read/all db :goal)
-                      (read/done-goal-ids db (if iteration-id
-                                               (util/parse-int iteration-id)
-                                               (:id (read/current-iteration db))))))
-   (GET "/goal" [id]
-        (let [current-iteration (read/current-iteration db)
+        (let [iteration (if iteration-id
+                          (read/row db :iteration (util/parse-int iteration-id))
+                          (read/current-iteration db))]
+          (render/index config
+                        iteration
+                        (read/all db :goal)
+                        (read/done-goal-ids db (:id iteration)))))
+   (GET "/goal" [id iteration-id]
+        (let [current-iteration (if iteration-id
+                                  (read/row db :iteration (util/parse-int iteration-id))
+                                  (read/current-iteration db))
               goalid (util/parse-int id)]
           (render/goal config
                        (merge (all-tasks db (:id current-iteration) goalid)
