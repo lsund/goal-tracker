@@ -2,6 +2,7 @@
   (:require [clojure.java.jdbc :as j]
             [clj-time.core :as time]
             [helper.util :as util]
+            [helper.db.core :as db]
             [slingshot.slingshot :refer [throw+]]))
 
 (defn row [db table id]

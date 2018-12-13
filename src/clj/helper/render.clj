@@ -150,7 +150,7 @@
                     [:input {:type :date :name "deadline" :required "true"}])
            [:h2 "Current Goals"]
            [:ol
-            (for [goal (sort-by :priority goals)]
+            (for [goal (sort-by :sequence goals)]
               [:li [:div {:class (if (some #{(:id goal)} done-goal-ids) "green" "")}
                     [:a {:href (str "/goal?id=" (:id goal))} (str (:description goal)
                                                                   " by "

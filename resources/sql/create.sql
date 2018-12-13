@@ -8,7 +8,7 @@ CREATE TABLE BOOK
 CREATE TABLE Goal
 (
     id              SERIAL PRIMARY KEY,
-    priority        INT NOT NULL,
+    sequence        INT NOT NULL,
     description     VARCHAR(64) NOT NULL,
     deadline        DATE NOT NULL
 );

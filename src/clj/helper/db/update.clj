@@ -21,12 +21,11 @@
   (create/taskupdate db :incrementaltask id))
 
 (defn toggle-done [db table id]
-  (let [done? (read/value db table :done id)]
-    (update-on-id db (keyword table) {:done (not done?)} id)
-    (when (some #{(keyword table)} [:checkedtask :readingtask])
-      (if done?
-        (create/taskupdate db table id)
-        (delete/by-id db table id)))))
+  (let [was-done? (read/value db table :done id)]
+    (update-on-id db (keyword table) {:done (not was-done?)} id)
+    (if was-done?
+      (delete/done-task-entry db id)
+      (create/taskupdate db table id))))
 
 (defn- succ-priority [p]
   (case p
