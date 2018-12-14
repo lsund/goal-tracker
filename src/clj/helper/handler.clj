@@ -2,7 +2,7 @@
   "Namespace for handling routes"
   (:require
    [compojure.route :as r]
-   [compojure.core :refer [routes GET POST ANY]]
+   [compojure.core :refer [routes GET POST]]
    [clj-time.core :as time]
    [medley.core :refer [filter-vals map-vals]]
    [ring.util.response :refer [redirect]]
@@ -52,6 +52,22 @@
      :checked-task-log (read/task-log (assoc params :kind :checked))
      :reading-task-log (read/task-log (assoc params :kind :reading))}))
 
+
+(defn- goal-handler [{:keys [db] :as config} id iteration-id]
+  (let [current-iteration (if iteration-id
+                            (read/row db :iteration (util/parse-int iteration-id))
+                            (read/current-iteration db))
+        goalid (util/parse-int id)]
+    (render/goal config
+                 (read/all db :iteration)
+                 (merge (all-tasks db (:id current-iteration) goalid)
+                        (all-logs db (:id current-iteration) goalid)
+                        {:goal (read/row db :goal (util/parse-int id))
+                         :current-iteration current-iteration
+                         :actionitems (read/all-where db
+                                                      :actionitem
+                                                      (str "goalid=" goalid))}))))
+
 (defn- app-routes
   [{:keys [db] :as config}]
   (routes
@@ -60,24 +76,16 @@
                           (read/row db :iteration (util/parse-int iteration-id))
                           (read/current-iteration db))]
           (render/index config
+                        (read/all db :iteration)
                         iteration
                         (read/all db :goal)
                         (read/done-goal-ids db (:id iteration)))))
    (GET "/goal" [id iteration-id]
-        (let [current-iteration (if iteration-id
-                                  (read/row db :iteration (util/parse-int iteration-id))
-                                  (read/current-iteration db))
-              goalid (util/parse-int id)]
-          (render/goal config
-                       (merge (all-tasks db (:id current-iteration) goalid)
-                              (all-logs db (:id current-iteration) goalid)
-                              {:goal (read/row db :goal (util/parse-int id))
-                               :current-iteration current-iteration
-                               :actionitems (read/all-where db
-                                                            :actionitem
-                                                            (str "goalid=" goalid))}))))
+        (goal-handler config id iteration-id))
    (GET "/books" []
-        (render/books config (sort-by :done (read/all db :book))))
+        (render/books config
+                      (read/all db :iteration)
+                      (sort-by :done (read/all db :book))))
    (POST "/add/:kind" [kind desc deadline goalid url]
          (case (keyword kind)
            :book (create/row db :book {:title desc

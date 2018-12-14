@@ -5,13 +5,23 @@
             [helper.util :as util]
             [medley.core :refer [find-first]]))
 
-(defn navbar []
+(defn navbar [{:keys [iterations url id iteration-id]}]
   [:div.mui-appbar
    [:table {:width "100%"}
     [:tr {:style "vertical-align:middle;"}
      [:td.mui--appbar-height
       (form-to [:get "/"]
+               [:input {:type :hidden :name "iteration-id" :value iteration-id}]
                [:input {:type :submit :value "Index"}])]
+     [:td.mui--appbar-height
+      (form-to [:get url]
+               [:input {:type :hidden :name "id" :value id}]
+               [:select {:name "rteration-id"}
+                (for [iteration iterations]
+                  [:option {:value (:id iteration)} (str  (:startdate iteration)
+                                                          "---"
+                                                          (:enddate iteration))])]
+               [:input {:type :submit :value "Go"}])]
      [:td.mui--appbar-height
       (form-to [:get "/books"]
                [:input {:type :submit :value "Books"}])]]]])

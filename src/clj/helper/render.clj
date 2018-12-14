@@ -9,18 +9,19 @@
    [helper.html :as html]))
 
 (defn- layout
-  [config title content]
+  [config params title content]
   (html5
    [:head
     [:title (str "Helper - " title)]]
    [:body.mui-container
-    (html/navbar)
+    (html/navbar params)
     content
     (apply include-css (:styles config))
     (apply include-js (:javascripts config))]))
 
-(defn books [config books]
+(defn books [config iterations books]
   (layout config
+          {:iterations iterations :url "/books"}
           "Books"
           [:div
            [:h2 "Add book"]
@@ -81,8 +82,9 @@
    [:h3 (str "Add new reading task")]
    (add-task-form params [[:input {:type :number :name "target" :required "true"}]])])
 
-(defn goal [config {:keys [goal current-iteration actionitems incremental-tasks checked-tasks reading-tasks] :as params}]
+(defn goal [config iterations {:keys [goal current-iteration actionitems incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
+          {:iterations iterations :url "/goal" :id (:id goal) :iteration-id (:id current-iteration)}
           "Goal"
           [:div
            [:h2 (:description goal)]
@@ -137,12 +139,12 @@
             (for [{:keys [title day]} (:reading-task-log params)]
               [:li (str title " " day)])]]))
 
-(defn index [config iteration goals done-goal-ids]
+(defn index [config iterations iteration goals done-goal-ids]
   (layout config
+          {:iterations iterations :url "/"}
           "Overview"
           [:div
            [:h1 "Helper"]
-           [:p "This is a tool for personal development"]
            [:h2 "Add new goal"]
            (form-to [:post "/add/goal"]
                     [:input {:name "desc"
