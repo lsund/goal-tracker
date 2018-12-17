@@ -20,7 +20,7 @@
 
 (defn ensure-current-iteration [handler db]
   (fn [req]
-    (when-not (read/current-iteration db)
+    (when-not (read/iteration db)
       (let [now (time/now)
             first-day (time/first-day-of-the-month now)
             last-day (time/last-day-of-the-month now)]
@@ -56,7 +56,7 @@
 (defn- goal-handler [{:keys [db] :as config} id iteration-id]
   (let [current-iteration (if iteration-id
                             (read/row db :iteration (util/parse-int iteration-id))
-                            (read/current-iteration db))
+                            (read/iteration db))
         goalid (util/parse-int id)]
     (render/goal config
                  (read/all db :iteration)
@@ -74,7 +74,7 @@
    (GET "/" [iteration-id]
         (let [iteration (if iteration-id
                           (read/row db :iteration (util/parse-int iteration-id))
-                          (read/current-iteration db))]
+                          (read/iteration db))]
           (render/index config
                         (read/all db :iteration)
                         iteration

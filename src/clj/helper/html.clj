@@ -11,12 +11,13 @@
     [:tr {:style "vertical-align:middle;"}
      [:td.mui--appbar-height
       (form-to [:get "/"]
-               [:input {:type :hidden :name "iteration-id" :value iteration-id}]
+               (when iteration-id
+                 [:input {:type :hidden :name "iteration-id" :value iteration-id}])
                [:input {:type :submit :value "Index"}])]
      [:td.mui--appbar-height
       (form-to [:get url]
                [:input {:type :hidden :name "id" :value id}]
-               [:select {:name "rteration-id"}
+               [:select {:name "iteration-id"}
                 (for [iteration iterations]
                   [:option {:value (:id iteration)} (str  (:startdate iteration)
                                                           "---"

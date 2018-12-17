@@ -20,17 +20,21 @@
 (defn all-where [db table clause]
   (j/query db [(str "SELECT * FROM " (name table) " WHERE " clause)]))
 
-(defn current-iteration [db]
-  (let [now (util/->sqldate (time/now))]
-    (if-let [iteration
-             (first (j/query db ["select * from iteration where id = 17"])) ;; TODO remove
-             #_(first (j/query db
-                               [(str "SELECT * FROM iteration where ? >= startdate and ? <= enddate") now now]))]
-      iteration
-      (throw+ {:type ::no-current-iteration}))))
+(defn iteration
+  ([db]
+   (iteration db 0))
+  ([db n]
+   (let [now (util/->sqldate (.plusMonths (time/now) n))]
+     (when-let [iteration (first (j/query db
+                                        [(str "SELECT *
+                                              FROM iteration
+                                              WHERE ? >= startdate and ? <= enddate")
+                                         now
+                                         now]))]
+       iteration))))
 
 (defn all-reading-tasks [db goalid iterationid]
-   (j/query db [ "SELECT readingtask.*, book.title as description
+  (j/query db [ "SELECT readingtask.*, book.title as description
                   FROM readingtask
                   INNER JOIN book
                   ON book.id = readingtask.bookid
@@ -39,17 +43,17 @@
 (defn done-goal-ids [db iterationid]
   (map :id (j/query db
                     ["SELECT id FROM goal WHERE id NOT IN (
-                     (SELECT distinct(goalid)
-                      FROM checkedtask
-                      WHERE done = false AND iterationid = ?)
-                     UNION
-                     (SELECT distinct(goalid)
-                      FROM incrementaltask
-                      WHERE current < target AND iterationid = ?)
-                     UNION
-                     (SELECT distinct(goalid)
-                      FROM readingtask
-                      WHERE done = false AND iterationid = ?));"
+                      (SELECT distinct(goalid)
+                       FROM checkedtask
+                       WHERE done = false AND iterationid = ?)
+                      UNION
+                      (SELECT distinct(goalid)
+                       FROM incrementaltask
+                       WHERE current < target AND iterationid = ?)
+                      UNION
+                      (SELECT distinct(goalid)
+                       FROM readingtask
+                       WHERE done = false AND iterationid = ?));"
                      iterationid
                      iterationid
                      iterationid])))
