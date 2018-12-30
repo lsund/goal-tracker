@@ -112,11 +112,10 @@
                                                           :iterationid (:id current-iteration)})}])])
 
 (defn- format-estimate [{:keys [hours minutes]}]
-  (let [or-0 (fn [x] (if x x "0"))]
-    (str "Estimate: " (or-0 hours) "h " (or-0 minutes) "m")))
+  (str "Estimate: " (or hours "0") "h " (or minutes "0") "m"))
 
-(defn goal [config iterations {:keys [goal current-iteration actionitems subgoals total-estimate
-                                      incremental-tasks checked-tasks reading-tasks] :as params}]
+(defn goal [config {:keys [iterations goal current-iteration actionitems subgoals total-estimate
+                           incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
           {:iterations iterations :url "/goal" :id (:id goal) :iterationid (:id current-iteration)}
           "Goal"
@@ -190,7 +189,10 @@
             (for [{:keys [title day]} (:reading-task-log params)]
               [:li (str title " " day)])]]))
 
-(defn index [config iterations iteration goals done-goal-ids]
+(defn- format-goal-title [goal]
+  (str (:description goal) " by " (:deadline goal) " " (format-estimate (:estimate goal)) ")"))
+
+(defn index [config {:keys [iterations iteration goals done-goal-ids]}]
   (layout config
           {:iterations iterations
            :url "/"
@@ -203,7 +205,7 @@
               [:li.mui-panel [:div {:class (if (some #{(:id goal)} done-goal-ids) "green" "")}
                               [:a {:href (util/make-query-url "/goal" {:id (:id goal)
                                                                        :iterationid (:id iteration)})}
-                               (str (:description goal) " by " (:deadline goal))]]])]
+                               (format-goal-title goal)]]])]
            [:h2 "Add new goal"]
            (form-to [:post "/add/goal"]
                     [:input {:name "desc"

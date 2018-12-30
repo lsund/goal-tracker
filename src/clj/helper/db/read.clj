@@ -2,6 +2,7 @@
   (:require [clojure.java.jdbc :as j]
             [clj-time.core :as time]
             [helper.util :as util]
+            [medley.core :refer [find-first]]
             [helper.db.core :as db]
             [slingshot.slingshot :refer [throw+]]))
 
@@ -26,11 +27,11 @@
   ([db n]
    (let [now (util/->sqldate (.plusMonths (time/now) n))]
      (when-let [iteration (first (j/query db
-                                        [(str "SELECT *
+                                          [(str "SELECT *
                                               FROM iteration
                                               WHERE ? >= startdate and ? <= enddate")
-                                         now
-                                         now]))]
+                                           now
+                                           now]))]
        iteration))))
 
 (defn all-reading-tasks [db goalid iterationid]
@@ -99,7 +100,7 @@
 (defn- parse-time-val [x]
   [(util/parse-int x)
    (cond
-     (re-matches #"[1-9]+h" x) :hours
+     (re-matches #"[0-9]+h" x) :hours
      (re-matches #"[0-9]+m" x) :minutes
      :default nil)])
 
@@ -121,3 +122,31 @@
    (group-by second)
    (map (fn [[unit estimates]] [unit (apply + (map first estimates))]))
    (into {})))
+
+(defn- map-vals [f xs]
+  (map (fn [[k v]] [k (f v)]) xs))
+
+(defn- total-estimates [db iterationid]
+  (->>
+   (concat (j/query db
+                    ["SELECT goalid, timeestimate
+                     FROM readingtask
+                     WHERE iterationid = ?"
+                     iterationid])
+           (j/query db
+                    ["SELECT goalid, timeestimate
+                     FROM incrementaltask
+                     WHERE iterationid = ?"
+                     iterationid]))
+   (group-by :goalid)
+   (map-vals #(map (comp parse-time-val :timeestimate) %))
+   (map-vals #(group-by second %))
+   (map-vals #(map (fn [[unit estimates]] [unit (apply + (map first estimates))]) %))
+   (map-vals #(into {} %))))
+
+(defn goals-with-estimates [db iterationid]
+  (let [estimates (total-estimates db iterationid)]
+    (map #(assoc %
+                 :estimate
+                 (second (find-first (fn [[k _]] (= k (:id %))) estimates)))
+         (all db :goal))))

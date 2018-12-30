@@ -59,10 +59,10 @@
                             (read/iteration db))
         goalid (util/parse-int id)]
     (render/goal config
-                 (read/all db :iteration)
                  (merge (all-tasks db (:id current-iteration) goalid)
                         (all-logs db (:id current-iteration) goalid)
                         {:goal (read/row db :goal (util/parse-int id))
+                         :iterations (read/all db :iteration)
                          :current-iteration current-iteration
                          :total-estimate (read/total-estimate db
                                                               (util/parse-int id)
@@ -83,10 +83,10 @@
                           (read/row db :iteration (util/parse-int iterationid))
                           (read/iteration db))]
           (render/index config
-                        (read/all db :iteration)
-                        iteration
-                        (read/all db :goal)
-                        (read/done-goal-ids db (:id iteration)))))
+                        {:iterations (read/all db :iteration)
+                         :iteration iteration
+                         :goals (read/goals-with-estimates db (util/parse-int iterationid))
+                         :done-goal-ids (read/done-goal-ids db (:id iteration))})))
    (GET "/goal" [id iterationid iterationid]
         (goal-handler config id iterationid))
    (GET "/books" [iterationid]
