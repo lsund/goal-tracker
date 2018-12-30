@@ -67,6 +67,9 @@
                          :actionitems (read/all-where db
                                                       :actionitem
                                                       (str "goalid=" goalid))
+                         :subgoals (read/all-where db
+                                                   :subgoal
+                                                   (str "goalid=" goalid))
                          :books (read/all db :book)}))))
 
 (defn- app-routes
@@ -88,14 +91,17 @@
                       (read/all db :iteration)
                       iterationid
                       (sort-by :done (read/all db :book))))
-   (POST "/add/:kind" [kind desc deadline goalid url]
+   (POST "/add/:kind" [kind desc deadline goalid url thisiteration]
          (case (keyword kind)
            :book (create/row db :book {:title desc
                                        :done false})
            :goal (create/row db :goal {:description desc
                                        :deadline (util/->sqldate deadline)})
            :actionitem (create/row db :actionitem {:goalid (util/parse-int goalid)
-                                                   :description desc}))
+                                                   :description desc})
+           :subgoal (create/row db :subgoal {:goalid (util/parse-int goalid)
+                                             :description desc
+                                             :thisiteration (util/checked->bool thisiteration)}))
          (if url
            (redirect url)
            (redirect "/")))

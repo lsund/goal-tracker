@@ -101,21 +101,43 @@
             [:input {:type :number :name "target"}]
             [:input {:type :submit :value "Add"}])])
 
-(defn goal [config iterations {:keys [goal current-iteration actionitems
+(defn goal [config iterations {:keys [goal current-iteration actionitems subgoals
                                       incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
           {:iterations iterations :url "/goal" :id (:id goal) :iterationid (:id current-iteration)}
           "Goal"
           [:div
            [:h2 (:description goal)]
-           [:h3 "Add action item"]
+           [:h3 "Add Subgoal"]
+           (form-to [:post "/add/subgoal"]
+                    [:input {:type :text
+                             :name "desc"
+                             :placeholder "Description"
+                             :required "true"}]
+                    [:input {:type :hidden :name "goalid" :value (:id goal)}]
+                    [:input {:type :hidden
+                             :name "url"
+                             :value (util/make-query-url "/goal"
+                                                         {:id (:id goal)
+                                                          :iterationid (:id current-iteration)})}]
+                    [:label "This iteration?"]
+                    [:input {:type :checkbox :name "thisiteration" :checked "true"}])
+           [:h3 "Subgoals"]
+           [:ul
+            (for [subgoal subgoals]
+              [:li (str (:description subgoal) (str (if (:thisiteration subgoal) " (this iteration)" "")))])]
+           [:h3 "Add Action Item"]
            (form-to [:post "/add/actionitem"]
                     [:input {:type :text
                              :name "desc"
                              :placeholder "Action Item Description"
                              :required "true"}]
                     [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                    [:input {:type :hidden :name "url" :value (util/make-query-url "/goal" goal [:id])}])
+                    [:input {:type :hidden
+                             :name "url"
+                             :value (util/make-query-url "/goal"
+                                                         {:id (:id goal)
+                                                          :iterationid (:id current-iteration)})}])
            [:ul
             (for [item actionitems]
               [:li (str (:description item))])]

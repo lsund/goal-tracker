@@ -14,6 +14,15 @@ CREATE TABLE Goal
     deadline        DATE NOT NULL
 );
 
+CREATE TABLE SubGoal
+(
+    id              SERIAL PRIMARY KEY,
+    goalid          INT NOT NULL,
+    description     VARCHAR(64) NOT NULL,
+    thisiteration   BOOLEAN NOT NULL,
+    FOREIGN KEY     (goalid) REFERENCES goal (id)
+);
+
 CREATE TABLE ActionItem
 (
     id              SERIAL PRIMARY KEY,

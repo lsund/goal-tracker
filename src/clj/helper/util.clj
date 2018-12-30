@@ -11,6 +11,18 @@
     (= (type x) java.lang.String) (try (Integer. (re-find #"\d+" x))
                                        (catch NumberFormatException _ nil))
     :default nil))
+
+(defn parse-bool [x]
+  (cond
+    (= (type x) java.lang.Boolean) x
+    (= (type x) java.lang.String) (Boolean. x)
+    :default nil))
+
+(defn checked->bool [x]
+  (case x
+    "on" true
+    false))
+
 (defn parse-date [s]
   (time.format/parse (time.format/formatters :year-month-day) s))
 
