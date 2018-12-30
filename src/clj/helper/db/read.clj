@@ -97,11 +97,11 @@
             iterationid
             goalid]))
 
-(defn- parse-time-val [x]
-  [(util/parse-int x)
+(defn- parse-time-val [{:keys [timeestimate target]}]
+  [(* (util/parse-int timeestimate) (or target 1))
    (cond
-     (re-matches #"[0-9]+h" x) :hours
-     (re-matches #"[0-9]+m" x) :minutes
+     (re-matches #"[0-9]+h" timeestimate) :hours
+     (re-matches #"[0-9]+m" timeestimate) :minutes
      :default nil)])
 
 (defn total-estimate [db goalid iterationid]
@@ -113,12 +113,12 @@
                      goalid
                      iterationid])
            (j/query db
-                    ["SELECT timeestimate
+                    ["SELECT timeestimate, target
                       FROM incrementaltask
                       WHERE goalid = ? AND iterationid = ?"
                      goalid
                      iterationid]))
-   (map (comp parse-time-val :timeestimate))
+   (map parse-time-val)
    (group-by second)
    (map (fn [[unit estimates]] [unit (apply + (map first estimates))]))
    (into {})))
@@ -126,7 +126,7 @@
 (defn- map-vals [f xs]
   (map (fn [[k v]] [k (f v)]) xs))
 
-(defn- total-estimates [db iterationid]
+(defn total-estimates [db iterationid]
   (->>
    (concat (j/query db
                     ["SELECT goalid, timeestimate
@@ -134,12 +134,12 @@
                      WHERE iterationid = ?"
                      iterationid])
            (j/query db
-                    ["SELECT goalid, timeestimate
+                    ["SELECT goalid, timeestimate, target
                      FROM incrementaltask
                      WHERE iterationid = ?"
                      iterationid]))
    (group-by :goalid)
-   (map-vals #(map (comp parse-time-val :timeestimate) %))
+   (map-vals #(map parse-time-val %))
    (map-vals #(group-by second %))
    (map-vals #(map (fn [[unit estimates]] [unit (apply + (map first estimates))]) %))
    (map-vals #(into {} %))))
