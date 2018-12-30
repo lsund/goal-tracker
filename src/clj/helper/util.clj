@@ -46,3 +46,6 @@
    (make-query-url base m (keys m)))
   ([base m ks]
    (str base "?" (string/join "&" (for [k ks] (if-let [v (m k)] (str (name k) "=" v) ""))))))
+
+(defn format-estimate [{:keys [hours minutes]}]
+  (str "Estimate: " (or hours "0") "h " (or minutes "0") "m"))

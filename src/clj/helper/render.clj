@@ -111,9 +111,6 @@
                      :value (util/make-query-url "/goal" {:id (:id goal)
                                                           :iterationid (:id current-iteration)})}])])
 
-(defn- format-estimate [{:keys [hours minutes]}]
-  (str "Estimate: " (or hours "0") "h " (or minutes "0") "m"))
-
 (defn goal [config {:keys [iterations goal current-iteration actionitems subgoals total-estimate
                            incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
@@ -121,7 +118,7 @@
           "Goal"
           [:div
            [:h2 (:description goal)]
-           [:h3 (format-estimate total-estimate)]
+           [:h3 (util/format-estimate total-estimate)]
            [:h3 "Add Subgoal"]
            (form-to [:post "/add/subgoal"]
                     [:input {:type :text
@@ -190,7 +187,7 @@
               [:li (str title " " day)])]]))
 
 (defn- format-goal-title [goal]
-  (str (:description goal) " by " (:deadline goal) " " (format-estimate (:estimate goal)) ")"))
+  (str (:description goal) " by " (:deadline goal) " " (util/format-estimate (:estimate goal)) ")"))
 
 (defn index [config {:keys [iterations iteration goals done-goal-ids]}]
   (layout config

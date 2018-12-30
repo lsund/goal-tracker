@@ -49,12 +49,13 @@
                  [:th "Up priority"]
                  [:th "Down priority"]
                  [:th "Description"]
-                 [:th "Toggle"]]
+                 [:th "Toggle"]
+                 [:th "Estimate"]]
                 (map #(conj [:th] %) extra-rows)))])
 
 (defn make-tablebody [type goal tasks done-test & extra-keys]
   [:tbody
-   (for [{:keys [actionitemid sequence priority id description] :as task} (sort-by :sequence tasks)]
+   (for [{:keys [actionitemid sequence priority id description timeestimate] :as task} (sort-by :sequence tasks)]
      (let [extra-rows (for [k extra-keys] (get task k))]
        (vec (concat  [:tr {:class (when (done-test task) "green")}
                       [:td actionitemid]
@@ -65,7 +66,8 @@
                       [:td (button-form :prioritize :up type (:id goal) id)]
                       [:td (button-form :prioritize :down type (:id goal) id)]
                       [:td description]
-                      [:td (button-form :nudge :at type (:id goal) id)]]
+                      [:td (button-form :nudge :at type (:id goal) id)]
+                      [:td timeestimate]]
                      (map #(conj [:td] %) extra-rows)))))])
 
 (defn table [type goal tasks done-test & extra-keys]
