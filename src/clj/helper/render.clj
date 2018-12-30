@@ -58,7 +58,10 @@
                            :name "desc"
                            :placeholder "Task Description"
                            :required "true"}]
-                  [:input {:type :hidden :name "url" :value (util/make-query-url "/goal" goal [:id])}]
+                  [:input {:type :hidden
+                           :name "url"
+                           :value (util/make-query-url "/goal" {:id (:id goal)
+                                                                :iterationid (:id current-iteration)})}]
                   [:input.hidden {:type :submit}]]
                  extra-inputs)))
 
@@ -68,7 +71,7 @@
 (defmethod add-task :incrementaltask [params]
   [:div
    [:h3 (str "Add new incremental task")]
-   (add-task-form params [[:input {:type :number :name "target" :value 0 :required "true"}]
+   (add-task-form params [[:input {:type :number :name "target" :value 1 :required "true"}]
                           [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
                           [:input {:type :hidden :name "current" :value "0"}]])])
 
@@ -77,14 +80,28 @@
    [:h3 (str "Add new checked task")]
    (add-task-form params [])])
 
-(defmethod add-task :readingtask [params]
+(defmethod add-task :readingtask [{:keys [goal current-iteration actionitems books]}]
   [:div
    [:h3 (str "Add new reading task")]
-   (add-task-form params [[:input {:type :number :name "target" :required "true"}]])])
+   (form-to [:post "/add-task/readingtask"]
+            [:select {:name "actionitemid"}
+             (for [item actionitems]
+               [:option {:value (:id item)} (:description item)])]
+            [:select {:name "bookid"}
+             (for [book books]
+               [:option {:value (:id book)} (:title book)])]
+            [:input {:type :hidden :name "goalid" :value (:id goal)}]
+            [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
+            [:input {:type :hidden
+                     :name "url"
+                     :value (util/make-query-url "/goal" {:id (:id goal)
+                                                          :iterationid (:id current-iteration)})}]
+            [:input {:type :number :name "target" :required "true"}])])
 
-(defn goal [config iterations {:keys [goal current-iteration actionitems incremental-tasks checked-tasks reading-tasks] :as params}]
+(defn goal [config iterations {:keys [goal current-iteration actionitems
+                                      incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
-          {:iterations iterations :url "/goal" :id (:id goal) :iteration-id (:id current-iteration)}
+          {:iterations iterations :url "/goal" :id (:id goal) :iterationid (:id current-iteration)}
           "Goal"
           [:div
            [:h2 (:description goal)]
@@ -100,7 +117,6 @@
             (for [item actionitems]
               [:li (str (:description item))])]
            (add-task (assoc params :kind :incrementaltask))
-           (add-task (assoc params :kind :checkedtask))
            (add-task (assoc params :kind :readingtask))
            (if current-iteration
              [:h3 (str "Current iteration: " (:startdate current-iteration) " to " (:enddate current-iteration))]
@@ -114,11 +130,6 @@
                        :current
                        :target
                        :unit)
-           [:h3 "Checked tasks"]
-           (html/table :checkedtask
-                       goal
-                       checked-tasks
-                       :done)
            [:h3 "Reading tasks"]
            (html/table :readingtask
                        goal
@@ -157,7 +168,7 @@
             (for [goal (sort-by :sequence goals)]
               [:li [:div {:class (if (some #{(:id goal)} done-goal-ids) "green" "")}
                     [:a {:href (util/make-query-url "/goal" {:id (:id goal)
-                                                             :iteration-id (:id iteration)})}
+                                                             :iterationid (:id iteration)})}
                      (str (:description goal) " by " (:deadline goal))]]])]]))
 
 (def not-found (html5 "not found"))

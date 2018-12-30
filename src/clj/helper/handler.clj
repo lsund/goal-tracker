@@ -53,9 +53,9 @@
      :reading-task-log (read/task-log (assoc params :kind :reading))}))
 
 
-(defn- goal-handler [{:keys [db] :as config} id iteration-id]
-  (let [current-iteration (if iteration-id
-                            (read/row db :iteration (util/parse-int iteration-id))
+(defn- goal-handler [{:keys [db] :as config} id iterationid]
+  (let [current-iteration (if iterationid
+                            (read/row db :iteration (util/parse-int iterationid))
                             (read/iteration db))
         goalid (util/parse-int id)]
     (render/goal config
@@ -66,22 +66,23 @@
                          :current-iteration current-iteration
                          :actionitems (read/all-where db
                                                       :actionitem
-                                                      (str "goalid=" goalid))}))))
+                                                      (str "goalid=" goalid))
+                         :books (read/all db :book)}))))
 
 (defn- app-routes
   [{:keys [db] :as config}]
   (routes
-   (GET "/" [iteration-id]
-        (let [iteration (if iteration-id
-                          (read/row db :iteration (util/parse-int iteration-id))
+   (GET "/" [iterationid]
+        (let [iteration (if iterationid
+                          (read/row db :iteration (util/parse-int iterationid))
                           (read/iteration db))]
           (render/index config
                         (read/all db :iteration)
                         iteration
                         (read/all db :goal)
                         (read/done-goal-ids db (:id iteration)))))
-   (GET "/goal" [id iteration-id]
-        (goal-handler config id iteration-id))
+   (GET "/goal" [id iterationid]
+        (goal-handler config id iterationid))
    (GET "/books" []
         (render/books config
                       (read/all db :iteration)
@@ -97,10 +98,18 @@
          (if url
            (redirect url)
            (redirect "/")))
+   (POST "/add-task/readingtask" [target bookid goalid iterationid actionitemid url]
+         (create/row db :readingtask {:goalid (util/parse-int goalid)
+                                      :iterationid (util/parse-int iterationid)
+                                      :actionitemid (util/parse-int actionitemid)
+                                      :bookid (util/parse-int bookid)
+                                      :page (util/parse-int target)
+                                      :done false})
+
+         (redirect url))
    (POST "/add-task/:kind" [kind desc current target unit goalid iterationid actionitemid url]
          (let [extras (filter-vals some? {:unit unit
                                           :target (util/parse-int target)
-                                          :done false
                                           :current (util/parse-int current)})
                commons {:goalid (util/parse-int goalid)
                         :actionitemid (util/parse-int actionitemid)

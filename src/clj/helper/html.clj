@@ -5,19 +5,19 @@
             [helper.util :as util]
             [medley.core :refer [find-first]]))
 
-(defn navbar [{:keys [iterations url id iteration-id]}]
+(defn navbar [{:keys [iterations url id iterationid]}]
   [:div.mui-appbar
    [:table {:width "100%"}
     [:tr {:style "vertical-align:middle;"}
      [:td.mui--appbar-height
       (form-to [:get "/"]
-               (when iteration-id
-                 [:input {:type :hidden :name "iteration-id" :value iteration-id}])
+               (when iterationid
+                 [:input {:type :hidden :name "iterationid" :value iterationid}])
                [:input {:type :submit :value "Index"}])]
      [:td.mui--appbar-height
       (form-to [:get url]
                [:input {:type :hidden :name "id" :value id}]
-               [:select {:name "iteration-id"}
+               [:select {:name "iterationid"}
                 (for [iteration iterations]
                   [:option {:value (:id iteration)} (str  (:startdate iteration)
                                                           "---"
@@ -39,6 +39,7 @@
 (defn make-tablehead [& extra-rows]
   [:thead
    (vec (concat [:tr
+                 [:th "Actionitem"]
                  [:th "Sequence"]
                  [:th "Sequence Up"]
                  [:th "Sequence Down"]
@@ -51,9 +52,10 @@
 
 (defn make-tablebody [type goal tasks done-test & extra-keys]
   [:tbody
-   (for [{:keys [sequence priority id description] :as task} (sort-by :sequence tasks)]
+   (for [{:keys [actionitemid sequence priority id description] :as task} (sort-by :sequence tasks)]
      (let [extra-rows (for [k extra-keys] (get task k))]
        (vec (concat  [:tr {:class (when (done-test task) "green")}
+                      [:td actionitemid]
                       [:td sequence]
                       [:td (button-form :sort :up type (:id goal) id)]
                       [:td (button-form :sort :down type (:id goal) id)]
