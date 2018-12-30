@@ -95,3 +95,29 @@
               (SELECT id FROM readingtask WHERE iterationid = ? AND goalid = ?)"
             iterationid
             goalid]))
+
+(defn- parse-time-val [x]
+  [(util/parse-int x)
+   (cond
+     (re-matches #"[1-9]+h" x) :hours
+     (re-matches #"[0-9]+m" x) :minutes
+     :default nil)])
+
+(defn total-estimate [db goalid iterationid]
+  (->>
+   (concat (j/query db
+                    ["SELECT timeestimate
+                      FROM readingtask
+                      WHERE goalid = ? AND iterationid = ?"
+                     goalid
+                     iterationid])
+           (j/query db
+                    ["SELECT timeestimate
+                      FROM incrementaltask
+                      WHERE goalid = ? AND iterationid = ?"
+                     goalid
+                     iterationid]))
+   (map (comp parse-time-val :timeestimate))
+   (group-by second)
+   (map (fn [[unit estimates]] [unit (apply + (map first estimates))]))
+   (into {})))

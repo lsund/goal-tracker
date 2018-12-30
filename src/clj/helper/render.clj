@@ -51,15 +51,23 @@
 (defn add-task-form [{:keys [kind goal current-iteration actionitems]} extra-inputs]
   (apply form-to
          (concat [[:post (str "/add-task/" (name kind))]
-                  [:select {:name "actionitemid"}
-                   (for [item actionitems]
-                     [:option {:value (:id item)} (:description item)])]
-                  [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                  [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
-                  [:input {:type :text
-                           :name "desc"
-                           :placeholder "Task Description"
-                           :required "true"}]
+                  [:div
+                   [:select {:name "actionitemid"}
+                    (for [item actionitems]
+                      [:option {:value (:id item)} (:description item)])]]
+                  [:div
+                   [:input {:type :hidden :name "goalid" :value (:id goal)}]]
+                  [:div
+                   [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]]
+                  [:div
+                   [:input {:type :text
+                            :name "desc"
+                            :placeholder "Task Description"
+                            :required "true"}]]
+                  [:div
+                   [:input {:type :text
+                            :name :estimate
+                            :placeholder "Time Estimate"}]]
                   [:input {:type :hidden
                            :name "url"
                            :value (util/make-query-url "/goal" {:id (:id goal)
@@ -73,41 +81,48 @@
 (defmethod add-task :incrementaltask [params]
   [:div
    [:h3 (str "Add new incremental task")]
-   (add-task-form params [[:input {:type :number :name "target" :value 1 :required "true"}]
-                          [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]
+   (add-task-form params [[:div [:input {:type :number :name "target" :value 1 :required "true"}]]
+                          [:div [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]]
                           [:input {:type :hidden :name "current" :value "0"}]])])
-
-(defmethod add-task :checkedtask [params]
-  [:div
-   [:h3 (str "Add new checked task")]
-   (add-task-form params [])])
 
 (defmethod add-task :readingtask [{:keys [goal current-iteration actionitems books]}]
   [:div
    [:h3 (str "Add new reading task")]
    (form-to [:post "/add-task/readingtask"]
-            [:select {:name "actionitemid"}
-             (for [item actionitems]
-               [:option {:value (:id item)} (:description item)])]
-            [:select {:name "bookid"}
-             (for [book books]
-               [:option {:value (:id book)} (:title book)])]
+            [:div
+             [:select {:name "actionitemid"}
+              (for [item actionitems]
+                [:option {:value (:id item)} (:description item)])]]
+            [:div
+             [:select {:name "bookid"}
+              (for [book books]
+                [:option {:value (:id book)} (:title book)])]]
+            [:div
+             [:input {:type :text
+                      :name :estimate
+                      :placeholder "Time Estimate"}]]
+            [:input {:type :number :name "target"}]
+            [:div
+             [:input {:type :submit :value "Add"}]]
             [:input {:type :hidden :name "goalid" :value (:id goal)}]
             [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
             [:input {:type :hidden
                      :name "url"
                      :value (util/make-query-url "/goal" {:id (:id goal)
-                                                          :iterationid (:id current-iteration)})}]
-            [:input {:type :number :name "target"}]
-            [:input {:type :submit :value "Add"}])])
+                                                          :iterationid (:id current-iteration)})}])])
 
-(defn goal [config iterations {:keys [goal current-iteration actionitems subgoals
+(defn- format-estimate [{:keys [hours minutes]}]
+  (let [or-0 (fn [x] (if x x "0"))]
+    (str "Estimate: " (or-0 hours) "h " (or-0 minutes) "m")))
+
+(defn goal [config iterations {:keys [goal current-iteration actionitems subgoals total-estimate
                                       incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
           {:iterations iterations :url "/goal" :id (:id goal) :iterationid (:id current-iteration)}
           "Goal"
           [:div
            [:h2 (:description goal)]
+           [:h3 (format-estimate total-estimate)]
            [:h3 "Add Subgoal"]
            (form-to [:post "/add/subgoal"]
                     [:input {:type :text
@@ -182,20 +197,19 @@
            :iterationid (:id iteration)}
           "Overview"
           [:div
-           [:h1 "Helper"]
+           [:h2 "Current Goals"]
+           [:ol
+            (for [goal (sort-by :sequence goals)]
+              [:li.mui-panel [:div {:class (if (some #{(:id goal)} done-goal-ids) "green" "")}
+                              [:a {:href (util/make-query-url "/goal" {:id (:id goal)
+                                                                       :iterationid (:id iteration)})}
+                               (str (:description goal) " by " (:deadline goal))]]])]
            [:h2 "Add new goal"]
            (form-to [:post "/add/goal"]
                     [:input {:name "desc"
                              :type :text
                              :placeholder "Goal Description"
                              :required "true"}]
-                    [:input {:type :date :name "deadline" :required "true"}])
-           [:h2 "Current Goals"]
-           [:ol
-            (for [goal (sort-by :sequence goals)]
-              [:li [:div {:class (if (some #{(:id goal)} done-goal-ids) "green" "")}
-                    [:a {:href (util/make-query-url "/goal" {:id (:id goal)
-                                                             :iterationid (:id iteration)})}
-                     (str (:description goal) " by " (:deadline goal))]]])]]))
+                    [:input {:type :date :name "deadline" :required "true"}])]))
 
 (def not-found (html5 "not found"))

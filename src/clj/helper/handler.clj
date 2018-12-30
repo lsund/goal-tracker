@@ -64,6 +64,9 @@
                         (all-logs db (:id current-iteration) goalid)
                         {:goal (read/row db :goal (util/parse-int id))
                          :current-iteration current-iteration
+                         :total-estimate (read/total-estimate db
+                                                              (util/parse-int id)
+                                                              (util/parse-int iterationid))
                          :actionitems (read/all-where db
                                                       :actionitem
                                                       (str "goalid=" goalid))
