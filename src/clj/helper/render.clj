@@ -203,12 +203,16 @@
                               [:a {:href (util/make-query-url "/goal" {:id (:id goal)
                                                                        :iterationid (:id iteration)})}
                                (format-goal-title goal)]]])]
+           [:p (str "To fulfill all tasks, a calculated average of "
+                    (/ (apply + (filter some? (map (comp :hours :estimate) goals))) 90.0)
+                    " hours per day needs to be spent")]
            [:h2 "Add new goal"]
            (form-to [:post "/add/goal"]
                     [:input {:name "desc"
                              :type :text
                              :placeholder "Goal Description"
                              :required "true"}]
-                    [:input {:type :date :name "deadline" :required "true"}])]))
+                    [:input {:type :date :name "deadline" :required "true"}])])
+  )
 
 (def not-found (html5 "not found"))
