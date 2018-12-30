@@ -118,7 +118,7 @@
           "Goal"
           [:div
            [:h2 (:description goal)]
-           [:h3 (util/format-estimate total-estimate)]
+           [:h3 (util/format-time total-estimate)]
            [:h3 "Add Subgoal"]
            (form-to [:post "/add/subgoal"]
                     [:input {:type :text
@@ -187,7 +187,7 @@
               [:li (str title " " day)])]]))
 
 (defn- format-goal-title [goal]
-  (str (:description goal) " by " (:deadline goal) " " (util/format-estimate (:estimate goal)) ")"))
+  (str (:description goal) " by " (:deadline goal) " " (util/format-time (:estimate goal)) ")"))
 
 (defn index [config {:keys [iterations iteration goals done-goal-ids]}]
   (layout config

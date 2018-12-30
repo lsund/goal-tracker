@@ -47,5 +47,9 @@
   ([base m ks]
    (str base "?" (string/join "&" (for [k ks] (if-let [v (m k)] (str (name k) "=" v) ""))))))
 
-(defn format-estimate [{:keys [hours minutes]}]
+(defn format-time [{:keys [hours minutes]}]
   (str "Estimate: " (or hours "0") "h " (or minutes "0") "m"))
+
+(defn normalize-time [{:keys [hours minutes]}]
+  {:hours (+ (or  hours 0) (quot (or minutes 0) 60))
+   :minutes (rem (or minutes 0) 60)})

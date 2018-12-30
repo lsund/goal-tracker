@@ -121,7 +121,8 @@
    (map parse-time-val)
    (group-by second)
    (map (fn [[unit estimates]] [unit (apply + (map first estimates))]))
-   (into {})))
+   (into {})
+   util/normalize-time))
 
 (defn- map-vals [f xs]
   (map (fn [[k v]] [k (f v)]) xs))
@@ -142,7 +143,8 @@
    (map-vals #(map parse-time-val %))
    (map-vals #(group-by second %))
    (map-vals #(map (fn [[unit estimates]] [unit (apply + (map first estimates))]) %))
-   (map-vals #(into {} %))))
+   (map-vals #(into {} %))
+   (map-vals #(util/normalize-time %))))
 
 (defn goals-with-estimates [db iterationid]
   (let [estimates (total-estimates db iterationid)]
