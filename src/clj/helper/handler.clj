@@ -81,11 +81,12 @@
                         iteration
                         (read/all db :goal)
                         (read/done-goal-ids db (:id iteration)))))
-   (GET "/goal" [id iterationid]
+   (GET "/goal" [id iterationid iterationid]
         (goal-handler config id iterationid))
-   (GET "/books" []
+   (GET "/books" [iterationid]
         (render/books config
                       (read/all db :iteration)
+                      iterationid
                       (sort-by :done (read/all db :book))))
    (POST "/add/:kind" [kind desc deadline goalid url]
          (case (keyword kind)
@@ -99,13 +100,14 @@
            (redirect url)
            (redirect "/")))
    (POST "/add-task/readingtask" [target bookid goalid iterationid actionitemid url]
-         (create/row db :readingtask {:goalid (util/parse-int goalid)
-                                      :iterationid (util/parse-int iterationid)
-                                      :actionitemid (util/parse-int actionitemid)
-                                      :bookid (util/parse-int bookid)
-                                      :page (util/parse-int target)
-                                      :done false})
-
+         (let [page (util/parse-int target)
+               extras (if page {:page page} {})]
+           (create/row db :readingtask (merge {:goalid (util/parse-int goalid)
+                                               :iterationid (util/parse-int iterationid)
+                                               :actionitemid (util/parse-int actionitemid)
+                                               :bookid (util/parse-int bookid)
+                                               :done false}
+                                              extras)))
          (redirect url))
    (POST "/add-task/:kind" [kind desc current target unit goalid iterationid actionitemid url]
          (let [extras (filter-vals some? {:unit unit

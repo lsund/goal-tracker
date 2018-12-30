@@ -5,10 +5,12 @@
 
 (defn stringify [k] (-> k name string/capitalize))
 
-(defn parse-int [s]
-  (when s
-    (Integer. (re-find  #"\d+" s))))
-
+(defn parse-int [x]
+  (cond
+    (= (type x) java.lang.Integer) x
+    (= (type x) java.lang.String) (try (Integer. (re-find #"\d+" x))
+                                       (catch NumberFormatException _ nil))
+    :default nil))
 (defn parse-date [s]
   (time.format/parse (time.format/formatters :year-month-day) s))
 

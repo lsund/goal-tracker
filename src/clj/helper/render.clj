@@ -19,9 +19,11 @@
     (apply include-css (:styles config))
     (apply include-js (:javascripts config))]))
 
-(defn books [config iterations books]
+(defn books [config iterations iterationid books]
   (layout config
-          {:iterations iterations :url "/books"}
+          {:iterations iterations
+           :url "/books"
+           :iterationid iterationid}
           "Books"
           [:div
            [:h2 "Add book"]
@@ -96,7 +98,8 @@
                      :name "url"
                      :value (util/make-query-url "/goal" {:id (:id goal)
                                                           :iterationid (:id current-iteration)})}]
-            [:input {:type :number :name "target" :required "true"}])])
+            [:input {:type :number :name "target"}]
+            [:input {:type :submit :value "Add"}])])
 
 (defn goal [config iterations {:keys [goal current-iteration actionitems
                                       incremental-tasks checked-tasks reading-tasks] :as params}]
@@ -152,7 +155,9 @@
 
 (defn index [config iterations iteration goals done-goal-ids]
   (layout config
-          {:iterations iterations :url "/"}
+          {:iterations iterations
+           :url "/"
+           :iterationid (:id iteration)}
           "Overview"
           [:div
            [:h1 "Helper"]

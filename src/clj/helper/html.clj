@@ -10,7 +10,7 @@
    [:table {:width "100%"}
     [:tr {:style "vertical-align:middle;"}
      [:td.mui--appbar-height
-      (form-to [:get "/"]
+      (form-to [:get (util/make-query-url "/" {:iterationid iterationid})]
                (when iterationid
                  [:input {:type :hidden :name "iterationid" :value iterationid}])
                [:input {:type :submit :value "Index"}])]
@@ -24,7 +24,9 @@
                                                           (:enddate iteration))])]
                [:input {:type :submit :value "Go"}])]
      [:td.mui--appbar-height
-      (form-to [:get "/books"]
+      (form-to [:get (util/make-query-url "/books" {:iterationid iterationid})]
+               (when iterationid
+                 [:input {:type :hidden :name "iterationid" :value iterationid}])
                [:input {:type :submit :value "Books"}])]]]])
 
 (defn button-form [op control type goalid id]
