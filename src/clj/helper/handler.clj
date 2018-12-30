@@ -108,24 +108,26 @@
          (if url
            (redirect url)
            (redirect "/")))
-   (POST "/add-task/readingtask" [target bookid goalid iterationid actionitemid url]
+   (POST "/add-task/readingtask" [estimate target bookid goalid iterationid actionitemid url]
          (let [page (util/parse-int target)
                extras (if page {:page page} {})]
            (create/row db :readingtask (merge {:goalid (util/parse-int goalid)
                                                :iterationid (util/parse-int iterationid)
                                                :actionitemid (util/parse-int actionitemid)
                                                :bookid (util/parse-int bookid)
+                                               :timeestimate estimate
                                                :done false}
                                               extras)))
          (redirect url))
-   (POST "/add-task/:kind" [kind desc current target unit goalid iterationid actionitemid url]
+   (POST "/add-task/:kind" [estimate kind desc current target unit goalid iterationid actionitemid url]
          (let [extras (filter-vals some? {:unit unit
                                           :target (util/parse-int target)
                                           :current (util/parse-int current)})
                commons {:goalid (util/parse-int goalid)
                         :actionitemid (util/parse-int actionitemid)
                         :iterationid (util/parse-int iterationid)
-                        :description desc}]
+                        :description desc
+                        :timeestimate estimate}]
            (create/row db
                        (keyword kind)
                        (merge commons extras)))
