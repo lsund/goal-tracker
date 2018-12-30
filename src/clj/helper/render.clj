@@ -66,7 +66,7 @@
                             :required "true"}]]
                   [:div
                    [:input {:type :text
-                            :name :estimate
+                            :name "estimate"
                             :placeholder "Time Estimate"}]]
                   [:input {:type :hidden
                            :name "url"
@@ -99,7 +99,7 @@
                 [:option {:value (:id book)} (:title book)])]]
             [:div
              [:input {:type :text
-                      :name :estimate
+                      :name "estimate"
                       :placeholder "Time Estimate"}]]
             [:input {:type :number :name "target"}]
             [:div
