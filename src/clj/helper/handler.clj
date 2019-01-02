@@ -30,18 +30,7 @@
 
 (defn- all-tasks [db iterationid goalid]
   (map-vals (partial sort-by :sequence)
-            {:incremental-tasks (read/all-where db
-                                                :incrementaltask
-                                                (str "iterationid="
-                                                     iterationid
-                                                     " and goalid="
-                                                     goalid))
-             :checked-tasks (read/all-where db
-                                            :checkedtask
-                                            (str "iterationid="
-                                                 iterationid
-                                                 " and goalid="
-                                                 goalid))
+            {:incremental-tasks (read/all-incremental-tasks db goalid iterationid)
              :reading-tasks (read/all-reading-tasks db goalid iterationid)}))
 
 (defn- all-logs [db iterationid goalid]

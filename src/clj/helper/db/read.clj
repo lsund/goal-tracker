@@ -35,11 +35,20 @@
        iteration))))
 
 (defn all-reading-tasks [db goalid iterationid]
-  (j/query db [ "SELECT readingtask.*, book.title as description
-                  FROM readingtask
-                  INNER JOIN book
-                  ON book.id = readingtask.bookid
-                  WHERE iterationid = ? AND goalid = ?" iterationid goalid]))
+  (j/query db ["SELECT readingtask.*, book.title as description
+                 FROM readingtask
+                 INNER JOIN book
+                 ON book.id = readingtask.bookid
+                 WHERE iterationid = ? AND goalid = ?" iterationid goalid]))
+
+(defn all-incremental-tasks [db goalid iterationid]
+  (j/query db ["SELECT incrementaltask.*, actionitem.description as actionitemdescription
+                FROM incrementaltask
+                INNER JOIN actionitem
+                ON actionitem.id = incrementaltask.actionitemid
+                WHERE incrementaltask.iterationid = ? AND incrementaltask.goalid = ?"
+               iterationid
+               goalid]))
 
 (defn done-goal-ids [db iterationid]
   (map :id (j/query db
@@ -98,11 +107,12 @@
             goalid]))
 
 (defn- parse-time-val [{:keys [timeestimate target]}]
-  [(* (util/parse-int timeestimate) (or target 1))
-   (cond
-     (re-matches #"[0-9]+h" timeestimate) :hours
-     (re-matches #"[0-9]+m" timeestimate) :minutes
-     :default nil)])
+  (when timeestimate
+    [(* (util/parse-int timeestimate) (or target 1))
+     (cond
+       (re-matches #"[0-9]+h" timeestimate) :hours
+       (re-matches #"[0-9]+m" timeestimate) :minutes
+       :default nil)]))
 
 (defn total-estimate [db goalid iterationid]
   (->>

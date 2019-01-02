@@ -42,30 +42,31 @@
   [:thead
    (vec (concat [:tr
                  [:th "Actionitem"]
+                 [:th "Description"]
                  [:th "Sequence"]
                  [:th "Sequence Up"]
                  [:th "Sequence Down"]
                  [:th "Priority"]
                  [:th "Up priority"]
                  [:th "Down priority"]
-                 [:th "Description"]
                  [:th "Toggle"]
                  [:th "Estimate"]]
                 (map #(conj [:th] %) extra-rows)))])
 
 (defn make-tablebody [type goal tasks done-test & extra-keys]
   [:tbody
-   (for [{:keys [actionitemid sequence priority id description timeestimate] :as task} (sort-by :sequence tasks)]
+   (for [{:keys [actionitemdescription sequence priority
+                 id description timeestimate] :as task} (sort-by :sequence tasks)]
      (let [extra-rows (for [k extra-keys] (get task k))]
        (vec (concat  [:tr {:class (when (done-test task) "green")}
-                      [:td actionitemid]
+                      [:td actionitemdescription]
+                      [:td description]
                       [:td sequence]
                       [:td (button-form :sort :up type (:id goal) id)]
                       [:td (button-form :sort :down type (:id goal) id)]
                       [:td priority]
                       [:td (button-form :prioritize :up type (:id goal) id)]
                       [:td (button-form :prioritize :down type (:id goal) id)]
-                      [:td description]
                       [:td (button-form :nudge :at type (:id goal) id)]
                       [:td timeestimate]]
                      (map #(conj [:td] %) extra-rows)))))])
