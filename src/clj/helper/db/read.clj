@@ -47,14 +47,8 @@
   (map :id (j/query db
                     ["SELECT id FROM goal WHERE id NOT IN (
                       (SELECT distinct(goalid)
-                       FROM checkedtask
-                       WHERE done = false AND iterationid = ?)
-                      UNION
-                      (SELECT distinct(goalid)
                        FROM incrementaltask
-                       WHERE current < target AND iterationid = ?)
-                      );"
-                     iterationid
+                       WHERE current < target AND iterationid = ?));"
                      iterationid])))
 
 (defmulti task-log
@@ -68,17 +62,6 @@
              WHERE doneTaskEntry.tasktype = 1
              AND doneTaskEntry.taskid IN
                (SELECT id FROM incrementaltask WHERE iterationid = ? AND goalid = ?);"
-            iterationid
-            goalid]))
-
-(defmethod task-log :checked [{:keys [db goalid iterationid]}]
-  (j/query db
-           ["SELECT doneTaskEntry.day, checkedtask.description
-             FROM doneTaskEntry
-             INNER JOIN checkedtask ON doneTaskEntry.taskid = checkedtask.id
-             WHERE doneTaskEntry.tasktype = 2
-             AND doneTaskEntry.taskid IN
-               (SELECT id FROM checkedtask WHERE iterationid = ? AND goalid = ?);"
             iterationid
             goalid]))
 
