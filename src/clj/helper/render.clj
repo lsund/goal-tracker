@@ -134,9 +134,23 @@
                     [:label "This iteration?"]
                     [:input {:type :checkbox :name "thisiteration" :checked "true"}])
            [:h3 "Subgoals"]
-           [:ul
-            (for [subgoal subgoals]
-              [:li (str (:description subgoal) (str (if (:thisiteration subgoal) " (this iteration)" "")))])]
+           [:table
+            [:thead
+             [:tr
+              [:th "Name"]
+              [:th "Remove"]]]
+            [:tbody
+             (for [subgoal subgoals]
+               [:tr
+                [:td (str (:description subgoal) (str (if (:thisiteration subgoal) " (this iteration)" "")))]
+                [:td (form-to [:post "/remove/subgoal"]
+                              [:input {:type :hidden :name "id" :value (:id subgoal)}]
+                              [:input {:type :hidden
+                                       :name "url"
+                                       :value (util/make-query-url "/goal"
+                                                                   {:id (:id goal)
+                                                                    :iterationid (:id current-iteration)})}]
+                              [:input {:type :submit :value "x"}])]])]]
            [:h3 "Add Action Item"]
            (form-to [:post "/add/actionitem"]
                     [:input {:type :text
@@ -149,9 +163,23 @@
                              :value (util/make-query-url "/goal"
                                                          {:id (:id goal)
                                                           :iterationid (:id current-iteration)})}])
-           [:ul
-            (for [item actionitems]
-              [:li (str (:description item))])]
+           [:table
+            [:thead
+             [:tr
+              [:th "Name"
+               :th "Remove"]]]
+            [:tbody
+             (for [item actionitems]
+               [:tr
+                [:td  (str (:description item))]
+                [:td  (form-to [:post "/remove/actionitem"]
+                               [:input {:type :hidden :name "id" :value (:id item)}]
+                               [:input {:type :hidden
+                                        :name "url"
+                                        :value (util/make-query-url "/goal"
+                                                                    {:id (:id goal)
+                                                                     :iterationid (:id current-iteration)})}]
+                               [:input {:type :submit :value "x"}])]])]]
            (add-task (assoc params :kind :incrementaltask))
            (add-task (assoc params :kind :readingtask))
            (if current-iteration
@@ -161,6 +189,7 @@
            [:h3 "Incremental tasks"]
            (html/table :incrementaltask
                        goal
+                       (:id current-iteration)
                        incremental-tasks
                        (fn [task] (<= (:target task) (:current task)))
                        :current
@@ -169,6 +198,7 @@
            [:h3 "Reading tasks"]
            (html/table :readingtask
                        goal
+                       (:id current-iteration)
                        reading-tasks
                        :done
                        :page)

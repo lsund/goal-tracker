@@ -29,14 +29,15 @@
                  [:input {:type :hidden :name "iterationid" :value iterationid}])
                [:input {:type :submit :value "Books"}])]]]])
 
-(defn button-form [op control type goalid id]
+(defn button-form [op control type goalid id iterationid]
   (form-to [:post (str "/" (name op) "/" (name control) "/" (name type))]
            [:input {:type :submit :value "x"}]
            [:input {:type :hidden :name "goalid" :value goalid}]
            [:input {:type :hidden :name "id" :value id}]
            [:input {:type :hidden
                     :name "url"
-                    :value (util/make-query-url "/goal" {:id goalid})}]))
+                    :value (util/make-query-url "/goal" {:id goalid
+                                                         :iterationid iterationid})}]))
 
 (defn make-tablehead [& extra-rows]
   [:thead
@@ -53,7 +54,7 @@
                  [:th "Estimate"]]
                 (map #(conj [:th] %) extra-rows)))])
 
-(defn make-tablebody [type goal tasks done-test & extra-keys]
+(defn make-tablebody [type goal iterationid tasks done-test & extra-keys]
   [:tbody
    (for [{:keys [actionitemdescription sequence priority
                  id description timeestimate] :as task} (sort-by :sequence tasks)]
@@ -62,16 +63,16 @@
                       [:td actionitemdescription]
                       [:td description]
                       [:td sequence]
-                      [:td (button-form :sort :up type (:id goal) id)]
-                      [:td (button-form :sort :down type (:id goal) id)]
+                      [:td (button-form :sort :up type (:id goal) id iterationid)]
+                      [:td (button-form :sort :down type (:id goal) id iterationid)]
                       [:td priority]
-                      [:td (button-form :prioritize :up type (:id goal) id)]
-                      [:td (button-form :prioritize :down type (:id goal) id)]
-                      [:td (button-form :nudge :at type (:id goal) id)]
+                      [:td (button-form :prioritize :up type (:id goal) id iterationid)]
+                      [:td (button-form :prioritize :down type (:id goal) id iterationid)]
+                      [:td (button-form :nudge :at type (:id goal) id iterationid)]
                       [:td timeestimate]]
                      (map #(conj [:td] %) extra-rows)))))])
 
-(defn table [type goal tasks done-test & extra-keys]
+(defn table [type goal iterationid tasks done-test & extra-keys]
   [:table
    (apply make-tablehead (map (comp string/capitalize name) extra-keys))
-   (apply (partial make-tablebody type goal tasks done-test) extra-keys)])
+   (apply (partial make-tablebody type goal iterationid tasks done-test) extra-keys)])

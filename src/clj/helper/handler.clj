@@ -15,6 +15,7 @@
    [helper.db.read :as read]
    [helper.db.update :as update]
    [helper.db.create :as create]
+   [helper.db.delete :as delete]
    [helper.util :as util]
    [helper.render :as render]))
 
@@ -94,6 +95,11 @@
            :subgoal (create/row db :subgoal {:goalid (util/parse-int goalid)
                                              :description desc
                                              :thisiteration (util/checked->bool thisiteration)}))
+         (if url
+           (redirect url)
+           (redirect "/")))
+   (POST "/remove/:kind" [kind id url]
+         (delete/by-id db (keyword kind) (util/parse-int id))
          (if url
            (redirect url)
            (redirect "/")))
