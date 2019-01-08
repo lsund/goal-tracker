@@ -181,12 +181,11 @@
                                                                      :iterationid (:id current-iteration)})}]
                                [:input {:type :submit :value "x"}])]])]]
            (add-task (assoc params :kind :incrementaltask))
-           (add-task (assoc params :kind :readingtask))
            (if current-iteration
              [:h3 (str "Current iteration: " (:startdate current-iteration) " to " (:enddate current-iteration))]
              [:h3 (str "No current iteration")])
 
-           [:h3 "Incremental tasks"]
+           [:h3 "Tasks"]
            (html/table :incrementaltask
                        goal
                        (:id current-iteration)
@@ -195,26 +194,10 @@
                        :current
                        :target
                        :unit)
-           [:h3 "Reading tasks"]
-           (html/table :readingtask
-                       goal
-                       (:id current-iteration)
-                       reading-tasks
-                       :done
-                       :page)
-
-           [:h3 "Updated incremental tasks"]
+           [:h3 "Updated Tasks"]
            [:ul
             (for [{:keys [description day]} (:incremental-task-log params)]
-              [:li (str description " done on " day)])]
-           [:h3 "Updated checked tasks"]
-           [:ul
-            (for [{:keys [description day]} (:checked-task-log params)]
-              [:li (str description " " day)])]
-           [:h3 "Updated reading tasks"]
-           [:ul
-            (for [{:keys [title day]} (:reading-task-log params)]
-              [:li (str title " " day)])]]))
+              [:li (str description " done on " day)])]]))
 
 (defn- format-goal-title [goal]
   (str (:description goal) " by " (:deadline goal) " " (util/format-time (:estimate goal)) ")"))
