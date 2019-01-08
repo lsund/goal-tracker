@@ -34,13 +34,6 @@
                                            now]))]
        iteration))))
 
-(defn all-reading-tasks [db goalid iterationid]
-  (j/query db ["SELECT readingtask.*, book.title as description
-                 FROM readingtask
-                 INNER JOIN book
-                 ON book.id = readingtask.bookid
-                 WHERE iterationid = ? AND goalid = ?" iterationid goalid]))
-
 (defn all-incremental-tasks [db goalid iterationid]
   (j/query db ["SELECT incrementaltask.*, actionitem.description as actionitemdescription
                 FROM incrementaltask
@@ -60,11 +53,7 @@
                       (SELECT distinct(goalid)
                        FROM incrementaltask
                        WHERE current < target AND iterationid = ?)
-                      UNION
-                      (SELECT distinct(goalid)
-                       FROM readingtask
-                       WHERE done = false AND iterationid = ?));"
-                     iterationid
+                      );"
                      iterationid
                      iterationid])))
 
@@ -93,19 +82,6 @@
             iterationid
             goalid]))
 
-(defmethod task-log :reading [{:keys [db goalid iterationid]}]
-  (j/query db
-           ["SELECT doneTaskEntry.day, book.title
-             FROM doneTaskEntry
-             INNER JOIN readingtask
-             ON doneTaskEntry.taskid = readingtask.id
-             INNER JOIN book on book.id = readingtask.bookid
-             WHERE doneTaskEntry.tasktype = 3
-             AND doneTaskEntry.taskid IN
-              (SELECT id FROM readingtask WHERE iterationid = ? AND goalid = ?)"
-            iterationid
-            goalid]))
-
 (defn- parse-time-val [{:keys [timeestimate target]}]
   (when timeestimate
     [(* (util/parse-int timeestimate) (or target 1))
@@ -116,18 +92,12 @@
 
 (defn total-estimate [db goalid iterationid]
   (->>
-   (concat (j/query db
-                    ["SELECT timeestimate
-                      FROM readingtask
-                      WHERE goalid = ? AND iterationid = ?"
-                     goalid
-                     iterationid])
-           (j/query db
-                    ["SELECT timeestimate, target
+   (j/query db
+            ["SELECT timeestimate, target
                       FROM incrementaltask
                       WHERE goalid = ? AND iterationid = ?"
-                     goalid
-                     iterationid]))
+             goalid
+             iterationid])
    (map parse-time-val)
    (group-by second)
    (map (fn [[unit estimates]] [unit (apply + (map first estimates))]))
@@ -139,16 +109,11 @@
 
 (defn total-estimates [db iterationid]
   (->>
-   (concat (j/query db
-                    ["SELECT goalid, timeestimate
-                     FROM readingtask
-                     WHERE iterationid = ?"
-                     iterationid])
-           (j/query db
-                    ["SELECT goalid, timeestimate, target
+   (j/query db
+            ["SELECT goalid, timeestimate, target
                      FROM incrementaltask
                      WHERE iterationid = ?"
-                     iterationid]))
+             iterationid])
    (group-by :goalid)
    (map-vals #(map parse-time-val %))
    (map-vals #(group-by second %))

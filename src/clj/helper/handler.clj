@@ -103,17 +103,6 @@
          (if url
            (redirect url)
            (redirect "/")))
-   (POST "/add-task/readingtask" [estimate target bookid goalid iterationid actionitemid url]
-         (let [page (util/parse-int target)
-               extras (if page {:page page} {})]
-           (create/row db :readingtask (merge {:goalid (util/parse-int goalid)
-                                               :iterationid (util/parse-int iterationid)
-                                               :actionitemid (util/parse-int actionitemid)
-                                               :bookid (util/parse-int bookid)
-                                               :timeestimate estimate
-                                               :done false}
-                                              extras)))
-         (redirect url))
    (POST "/add-task/:kind" [estimate kind desc current target unit goalid iterationid actionitemid url]
          (let [extras (filter-vals some? {:unit unit
                                           :target (util/parse-int target)
@@ -131,7 +120,6 @@
          (case (keyword table)
            :incrementaltask (update/increment db (keyword table) :current (util/parse-int id))
            :checkedtask (update/toggle-done-task db (keyword table) (util/parse-int id))
-           :readingtask (update/toggle-done-task db (keyword table) (util/parse-int id))
            :book (update/toggle-done-book db (util/parse-int id)))
          (redirect url))
    (POST "/sort/:op/:table" [op table id goalid]

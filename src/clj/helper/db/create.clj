@@ -3,15 +3,10 @@
             [helper.util :as util]
             [clj-time.core :as time]))
 
-(def ^:private taskname->tasktype
-  {:incrementaltask 1
-   :checkedtask 2
-   :readingtask 3})
-
 (defn row [db table row]
   (j/insert! db table row))
 
 (defn done-task-entry [db table id]
   (row db :donetaskentry {:taskid id
-                          :tasktype (taskname->tasktype table)
+                          :tasktype 1
                           :day (util/->sqldate (time/now))}))

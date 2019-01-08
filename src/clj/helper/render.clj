@@ -85,32 +85,6 @@
                           [:div [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]]
                           [:input {:type :hidden :name "current" :value "0"}]])])
 
-(defmethod add-task :readingtask [{:keys [goal current-iteration actionitems books]}]
-  [:div
-   [:h3 (str "Add new reading task")]
-   (form-to [:post "/add-task/readingtask"]
-            [:div
-             [:select {:name "actionitemid"}
-              (for [item actionitems]
-                [:option {:value (:id item)} (:description item)])]]
-            [:div
-             [:select {:name "bookid"}
-              (for [book books]
-                [:option {:value (:id book)} (:title book)])]]
-            [:div
-             [:input {:type :text
-                      :name "estimate"
-                      :placeholder "Time Estimate"}]]
-            [:input {:type :number :name "target"}]
-            [:div
-             [:input {:type :submit :value "Add"}]]
-            [:input {:type :hidden :name "goalid" :value (:id goal)}]
-            [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]
-            [:input {:type :hidden
-                     :name "url"
-                     :value (util/make-query-url "/goal" {:id (:id goal)
-                                                          :iterationid (:id current-iteration)})}])])
-
 (defn goal [config {:keys [iterations goal current-iteration actionitems subgoals total-estimate
                            incremental-tasks checked-tasks reading-tasks] :as params}]
   (layout config
