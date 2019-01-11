@@ -31,17 +31,7 @@
 
 (defn- all-tasks [db iterationid goalid]
   (map-vals (partial sort-by :sequence)
-            {:incremental-tasks (read/all-incremental-tasks db goalid iterationid)
-             :reading-tasks (read/all-reading-tasks db goalid iterationid)}))
-
-(defn- all-logs [db iterationid goalid]
-  (let [params {:db db
-                :goalid goalid
-                :iterationid iterationid}]
-    {:incremental-task-log (read/task-log (assoc params :kind :incremental))
-     :checked-task-log (read/task-log (assoc params :kind :checked))
-     :reading-task-log (read/task-log (assoc params :kind :reading))}))
-
+            {:tasks (read/all-incremental-tasks db goalid iterationid)}))
 
 (defn- goal-handler [{:keys [db] :as config} id iterationid]
   (let [current-iteration (if iterationid
@@ -50,7 +40,7 @@
         goalid (util/parse-int id)]
     (render/goal config
                  (merge (all-tasks db (:id current-iteration) goalid)
-                        (all-logs db (:id current-iteration) goalid)
+                        {:task-log (read/task-log db (:id current-iteration) goalid)}
                         {:goal (read/row db :goal (util/parse-int id))
                          :iterations (read/all db :iteration)
                          :current-iteration current-iteration
@@ -103,7 +93,7 @@
          (if url
            (redirect url)
            (redirect "/")))
-   (POST "/add-task/:kind" [estimate kind desc current target unit goalid iterationid actionitemid url]
+   (POST "/add-task" [estimate desc current target unit goalid iterationid actionitemid url]
          (let [extras (filter-vals some? {:unit unit
                                           :target (util/parse-int target)
                                           :current (util/parse-int current)})
@@ -112,14 +102,11 @@
                         :iterationid (util/parse-int iterationid)
                         :description desc
                         :timeestimate estimate}]
-           (create/row db
-                       (keyword kind)
-                       (merge commons extras)))
+           (create/row db :task (merge commons extras)))
          (redirect url))
    (POST "/nudge/at/:table" [table id url]
          (case (keyword table)
-           :incrementaltask (update/increment db (keyword table) :current (util/parse-int id))
-           :checkedtask (update/toggle-done-task db (keyword table) (util/parse-int id))
+           :task (update/increment db :task :current (util/parse-int id))
            :book (update/toggle-done-book db (util/parse-int id)))
          (redirect url))
    (POST "/sort/:op/:table" [op table id goalid]

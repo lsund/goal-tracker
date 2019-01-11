@@ -35,11 +35,11 @@
        iteration))))
 
 (defn all-incremental-tasks [db goalid iterationid]
-  (j/query db ["SELECT incrementaltask.*, actionitem.description as actionitemdescription
-                FROM incrementaltask
+  (j/query db ["SELECT task.*, actionitem.description as actionitemdescription
+                FROM task
                 INNER JOIN actionitem
-                ON actionitem.id = incrementaltask.actionitemid
-                WHERE incrementaltask.iterationid = ? AND incrementaltask.goalid = ?"
+                ON actionitem.id = task.actionitemid
+                WHERE task.iterationid = ? AND task.goalid = ?"
                iterationid
                goalid]))
 
@@ -47,21 +47,18 @@
   (map :id (j/query db
                     ["SELECT id FROM goal WHERE id NOT IN (
                       (SELECT distinct(goalid)
-                       FROM incrementaltask
+                       FROM task
                        WHERE current < target AND iterationid = ?));"
                      iterationid])))
 
-(defmulti task-log
-  (fn [params] (:kind params)))
-
-(defmethod task-log :incremental [{:keys [db iterationid goalid]}]
+(defn task-log [db iterationid goalid]
   (j/query db
-           ["SELECT doneTaskEntry.day, incrementaltask.description
+           ["SELECT doneTaskEntry.day, task.description
              FROM doneTaskEntry
-             INNER JOIN incrementaltask ON doneTaskEntry.taskid = incrementaltask.id
+             INNER JOIN task ON doneTaskEntry.taskid = task.id
              WHERE doneTaskEntry.tasktype = 1
              AND doneTaskEntry.taskid IN
-               (SELECT id FROM incrementaltask WHERE iterationid = ? AND goalid = ?);"
+               (SELECT id FROM task WHERE iterationid = ? AND goalid = ?);"
             iterationid
             goalid]))
 
@@ -77,7 +74,7 @@
   (->>
    (j/query db
             ["SELECT timeestimate, target
-                      FROM incrementaltask
+                      FROM task
                       WHERE goalid = ? AND iterationid = ?"
              goalid
              iterationid])
@@ -94,7 +91,7 @@
   (->>
    (j/query db
             ["SELECT goalid, timeestimate, target
-                     FROM incrementaltask
+                     FROM task
                      WHERE iterationid = ?"
              iterationid])
    (group-by :goalid)
