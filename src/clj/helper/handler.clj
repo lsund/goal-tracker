@@ -8,6 +8,7 @@
             [helper.db.read :as read]
             [helper.db.update :as update]
             [helper.render :as render]
+            [helper.render.goal :as render.goal]
             [helper.util :as util]
             [medley.core :refer [filter-vals map-vals]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
@@ -34,22 +35,22 @@
                             (read/row db :iteration (util/parse-int iterationid))
                             (read/iteration db))
         goalid (util/parse-int id)]
-    (render/goal config
-                 (merge (all-tasks db (:id current-iteration) goalid)
-                        {:task-log (read/task-log db (:id current-iteration) goalid)}
-                        {:goal (read/row db :goal (util/parse-int id))
-                         :iterations (read/all db :iteration)
-                         :current-iteration current-iteration
-                         :total-estimate (read/total-estimate db
-                                                              (util/parse-int id)
-                                                              (util/parse-int iterationid))
-                         :actionitems (read/all-where db
-                                                      :actionitem
-                                                      (str "goalid=" goalid))
-                         :subgoals (read/all-where db
-                                                   :subgoal
-                                                   (str "goalid=" goalid))
-                         :books (read/all db :book)}))))
+    (render.goal/layout config
+                        (merge (all-tasks db (:id current-iteration) goalid)
+                               {:task-log (read/task-log db (:id current-iteration) goalid)}
+                               {:goal (read/row db :goal (util/parse-int id))
+                                :iterations (read/all db :iteration)
+                                :current-iteration current-iteration
+                                :total-estimate (read/total-estimate db
+                                                                     (util/parse-int id)
+                                                                     (util/parse-int iterationid))
+                                :actionitems (read/all-where db
+                                                             :actionitem
+                                                             (str "goalid=" goalid))
+                                :subgoals (read/all-where db
+                                                          :subgoal
+                                                          (str "goalid=" goalid))
+                                :books (read/all db :book)}))))
 
 (defn- app-routes
   [{:keys [db] :as config}]

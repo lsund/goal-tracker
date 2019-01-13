@@ -8,7 +8,7 @@
    [helper.util :as util]
    [helper.html :as html]))
 
-(defn- layout
+(defn layout
   [config params title content]
   (html5
    [:head
@@ -47,128 +47,6 @@
                                         :name "url"
                                         :value "/books"}])]
                  [:td donedate]])]]]]))
-
-(defn add-task-form [{:keys [goal current-iteration actionitems]} extra-inputs]
-  (apply form-to
-         (concat [[:post "/add-task"]
-                  [:div
-                   [:select {:name "actionitemid"}
-                    (for [item actionitems]
-                      [:option {:value (:id item)} (:description item)])]]
-                  [:div
-                   [:input {:type :hidden :name "goalid" :value (:id goal)}]]
-                  [:div
-                   [:input {:type :hidden :name "iterationid" :value (:id current-iteration)}]]
-                  [:div
-                   [:input {:type :text
-                            :name "desc"
-                            :placeholder "Task Description"
-                            :required "true"}]]
-                  [:div
-                   [:input {:type :text
-                            :name "estimate"
-                            :placeholder "Time Estimate"}]]
-                  [:input {:type :hidden
-                           :name "url"
-                           :value (util/make-query-url "/goal" {:id (:id goal)
-                                                                :iterationid (:id current-iteration)})}]
-                  [:input.hidden {:type :submit}]]
-                 extra-inputs)))
-
-(defn add-task [params]
-  [:div
-   [:h3 (str "Add new Task")]
-   (add-task-form params [[:div [:input {:type :number :name "target" :value 1 :required "true"}]]
-                          [:div [:input {:type :text :name "unit" :placeholder "Unit" :required "true"}]]
-                          [:input {:type :hidden :name "current" :value "0"}]])])
-
-(defn goal [config {:keys [iterations goal current-iteration actionitems subgoals total-estimate
-                           tasks task-log] :as params}]
-  (layout config
-          {:iterations iterations :url "/goal" :id (:id goal) :iterationid (:id current-iteration)}
-          "Goal"
-          [:div
-           [:h2 (:description goal)]
-           [:h3 (util/format-time total-estimate)]
-           [:h3 "Add Subgoal"]
-           (form-to [:post "/add/subgoal"]
-                    [:input {:type :text
-                             :name "desc"
-                             :placeholder "Description"
-                             :required "true"}]
-                    [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                    [:input {:type :hidden
-                             :name "url"
-                             :value (util/make-query-url "/goal"
-                                                         {:id (:id goal)
-                                                          :iterationid (:id current-iteration)})}]
-                    [:label "This iteration?"]
-                    [:input {:type :checkbox :name "thisiteration" :checked "true"}])
-           [:h3 "Subgoals"]
-           [:table
-            [:thead
-             [:tr
-              [:th "Name"]
-              [:th "Remove"]]]
-            [:tbody
-             (for [subgoal subgoals]
-               [:tr
-                [:td (str (:description subgoal) (str (if (:thisiteration subgoal) " (this iteration)" "")))]
-                [:td (form-to [:post "/remove/subgoal"]
-                              [:input {:type :hidden :name "id" :value (:id subgoal)}]
-                              [:input {:type :hidden
-                                       :name "url"
-                                       :value (util/make-query-url "/goal"
-                                                                   {:id (:id goal)
-                                                                    :iterationid (:id current-iteration)})}]
-                              [:input {:type :submit :value "x"}])]])]]
-           [:h3 "Add Action Item"]
-           (form-to [:post "/add/actionitem"]
-                    [:input {:type :text
-                             :name "desc"
-                             :placeholder "Action Item Description"
-                             :required "true"}]
-                    [:input {:type :hidden :name "goalid" :value (:id goal)}]
-                    [:input {:type :hidden
-                             :name "url"
-                             :value (util/make-query-url "/goal"
-                                                         {:id (:id goal)
-                                                          :iterationid (:id current-iteration)})}])
-           [:table
-            [:thead
-             [:tr
-              [:th "Name"
-               :th "Remove"]]]
-            [:tbody
-             (for [item actionitems]
-               [:tr
-                [:td  (str (:description item))]
-                [:td  (form-to [:post "/remove/actionitem"]
-                               [:input {:type :hidden :name "id" :value (:id item)}]
-                               [:input {:type :hidden
-                                        :name "url"
-                                        :value (util/make-query-url "/goal"
-                                                                    {:id (:id goal)
-                                                                     :iterationid (:id current-iteration)})}]
-                               [:input {:type :submit :value "x"}])]])]]
-           (add-task params)
-           (if current-iteration
-             [:h3 (str "Current iteration: " (:startdate current-iteration) " to " (:enddate current-iteration))]
-             [:h3 (str "No current iteration")])
-
-           [:h3 "Tasks"]
-           (html/table :task
-                       goal
-                       (:id current-iteration)
-                       tasks
-                       (fn [task] (<= (:target task) (:current task)))
-                       :current
-                       :target
-                       :unit)
-           [:h3 "Updated Tasks"]
-           [:ul
-            (for [{:keys [description day]} task-log]
-              [:li (str description " done on " day)])]]))
 
 (defn- format-goal-title [goal]
   (str (:description goal) " by " (:deadline goal) " " (util/format-time (:estimate goal)) ")"))
