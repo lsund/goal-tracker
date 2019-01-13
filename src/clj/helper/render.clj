@@ -66,7 +66,8 @@
                                                                        :iterationid (:id iteration)})}
                                (format-goal-title goal)]]])]
            [:p (str "To fulfill all tasks, a calculated average of "
-                    (/ (apply + (filter some? (map (comp :hours :estimate) goals))) 90.0)
+                    (format "%.1f"
+                            (/ (apply + (filter some? (map (comp :hours :estimate) goals))) 90.0))
                     " hours per day needs to be spent")]
            [:h2 "Add new goal"]
            (form-to [:post "/add/goal"]

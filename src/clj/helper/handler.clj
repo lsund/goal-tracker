@@ -110,7 +110,6 @@
          (update/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
    (POST "/prioritize/:op/:table" [op table id goalid]
-         (println op table id goalid)
          (update/tweak-priority db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
    (route/resources "/")
