@@ -9,6 +9,7 @@
             [helper.db.update :as update]
             [helper.render :as render]
             [helper.render.goal :as render.goal]
+            [helper.render.books :as render.books]
             [helper.util :as util]
             [medley.core :refer [filter-vals map-vals]]
             [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
@@ -62,15 +63,15 @@
           (render/index config
                         {:iterations (read/all db :iteration)
                          :iteration iteration
-                         :goals (read/goals-with-estimates db (util/parse-int iterationid))
+                         :goals (read/goals-with-estimates db (util/parse-int (:id iteration)))
                          :done-goal-ids (read/done-goal-ids db (:id iteration))})))
    (GET "/goal" [id iterationid iterationid]
         (goal-handler config id iterationid))
    (GET "/books" [iterationid]
-        (render/books config
-                      (read/all db :iteration)
-                      iterationid
-                      (sort-by :done (read/all db :book))))
+        (render.books/layout config
+                             (read/all db :iteration)
+                             iterationid
+                             (sort-by :done (read/all db :book))))
    (POST "/add/:kind" [kind desc deadline goalid url thisiteration]
          (case (keyword kind)
            :book (create/row db :book {:title desc

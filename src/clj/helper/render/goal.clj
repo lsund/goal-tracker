@@ -34,8 +34,7 @@
                      :name "url"
                      :value (util/make-query-url "/goal"
                                                  {:id (:id goal)
-                                                  :iterationid (:id current-iteration)})}])]
-  )
+                                                  :iterationid (:id current-iteration)})}])])
 
 (defn list-subgoals [{:keys [current-iteration subgoals]}]
   [:div
@@ -105,17 +104,14 @@
             [:input.hidden {:type :submit}]
             [:input {:type :hidden :name "current" :value "0"}])])
 
-(defn layout [config {:keys [iterations goal current-iteration actionitems subgoals total-estimate
-                             tasks task-log] :as params}]
+(defn layout [config params]
+  (println (:subgoals params))
   (render/layout config
-                 {:iterations iterations
-                  :url "/goal"
-                  :id (:id goal)
-                  :iterationid (:id current-iteration)}
+                 (assoc params :url "/goal")
                  "Goal"
                  [:div
                   [:h2 (:description goal)]
-                  [:h3 (util/format-time total-estimate)]
+                  [:h3 (util/format-time (:total-estimate params))]
                   [:div.mui-panel
                    (add-subgoal params)
                    (list-subgoals params)]
@@ -126,8 +122,8 @@
                    (add-task params)
                    (html/table :task
                                goal
-                               (:id current-iteration)
-                               tasks
+                               (get-in params [:current-iteration :id])
+                               (:tasks params)
                                (fn [task] (<= (:target task) (:current task)))
                                :current
                                :target
@@ -135,5 +131,5 @@
                   [:div.mui-panel
                    [:h3 "Updated Tasks"]
                    [:ul
-                    (for [{:keys [description day]} task-log]
+                    (for [{:keys [description day]} (:task-log params)]
                       [:li (str description " done on " day)])]]]))
