@@ -46,11 +46,11 @@
     :high :middle))
 
 (defn tweak-priority [db table id op]
-  (let [update-fn (if (= op :up) succ-priority pred-priority)
-        nxt (some-> db
-                    (read/value table :priority id)
-                    keyword
-                    update-fn)]
+  (let [current-priority (read/value db table :priority id)
+        update-fn (if (= op :up) succ-priority pred-priority)
+        nxt (if current-priority
+              (some-> current-priority keyword update-fn)
+              (if (= op :up) "high" "low"))]
     (update-on-id db table {:priority (name nxt)} id)))
 
 (defn tweak-sequence [db table id op]
