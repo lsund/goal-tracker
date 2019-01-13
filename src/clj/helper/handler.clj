@@ -1,23 +1,19 @@
 (ns helper.handler
   "Namespace for handling routes"
-  (:require
-   [compojure.route :as r]
-   [compojure.core :refer [routes GET POST]]
-   [clj-time.core :as time]
-   [medley.core :refer [filter-vals map-vals]]
-   [ring.util.response :refer [redirect]]
-   [ring.middleware
-    [defaults :refer [site-defaults wrap-defaults]]
-    [keyword-params :refer [wrap-keyword-params]]
-    [params :refer [wrap-params]]]
-   [taoensso.timbre :as logging]
-   [taoensso.timbre.appenders.core :as appenders]
-   [helper.db.read :as read]
-   [helper.db.update :as update]
-   [helper.db.create :as create]
-   [helper.db.delete :as delete]
-   [helper.util :as util]
-   [helper.render :as render]))
+  (:require [clj-time.core :as time]
+            [compojure.core :refer [GET POST routes]]
+            [compojure.route :as route]
+            [helper.db.create :as create]
+            [helper.db.delete :as delete]
+            [helper.db.read :as read]
+            [helper.db.update :as update]
+            [helper.render :as render]
+            [helper.util :as util]
+            [medley.core :refer [filter-vals map-vals]]
+            [ring.middleware.defaults :refer [site-defaults wrap-defaults]]
+            [ring.middleware.keyword-params :refer [wrap-keyword-params]]
+            [ring.middleware.params :refer [wrap-params]]
+            [ring.util.response :refer [redirect]]))
 
 (defn ensure-current-iteration [handler db]
   (fn [req]
@@ -115,8 +111,8 @@
    (POST "/prioritize/:op/:table" [op table id goalid]
          (update/tweak-priority db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
-   (r/resources "/")
-   (r/not-found render/not-found)))
+   (route/resources "/")
+   (route/not-found render/not-found)))
 
 (defn new-handler
   [config]
