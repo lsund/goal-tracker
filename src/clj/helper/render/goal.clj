@@ -120,8 +120,7 @@
                    (list-action-items params)]
                   [:div.mui-panel
                    (add-task params)
-                   (html/table :task
-                               goal
+                   (html/table goal
                                (get-in params [:current-iteration :id])
                                (:tasks params)
                                (fn [task] (<= (:target task) (:current task)))

@@ -7,8 +7,8 @@
             [helper.db.read :as read]
             [helper.db.delete :as delete]))
 
-(defn- update-on-id [db table update-map id]
-  (j/update! db table update-map ["id=?" id]))
+(defn row [db table data id]
+  (j/update! db table data ["id=?" id]))
 
 (defn increment [db table column id]
   (j/execute! db
@@ -23,14 +23,14 @@
 
 (defn toggle-done-task [db table id]
   (let [was-done? (read/value db table :done id)]
-    (update-on-id db (keyword table) {:done (not was-done?)} id)
+    (row db (keyword table) {:done (not was-done?)} id)
     (if was-done?
       (delete/done-task-entry db id)
       (create/done-task-entry db table id))))
 
 (defn toggle-done-book [db id]
   (let [was-done? (read/value db :book :done id)]
-    (update-on-id db :book {:done (not was-done?)
+    (row db :book {:done (not was-done?)
                             :donedate (when (not was-done?) (util/->sqldate (time/now)))} id)))
 
 (defn- succ-priority [p]
@@ -51,7 +51,7 @@
         nxt (if current-priority
               (some-> current-priority keyword update-fn)
               (if (= op :up) "high" "low"))]
-    (update-on-id db table {:priority (name nxt)} id)))
+    (row db table {:priority (name nxt)} id)))
 
 (defn tweak-sequence [db table id op]
   (let [update-fn (if (= op :up) util/pred util/succ)
@@ -59,4 +59,4 @@
                     (read/value table :sequence id)
                     update-fn)]
     (when (and nxt (< 0 nxt))
-      (update-on-id db table {:sequence nxt} id))))
+      (row db table {:sequence nxt} id))))

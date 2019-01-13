@@ -65,7 +65,7 @@
                          :iteration iteration
                          :goals (read/goals-with-estimates db (util/parse-int (:id iteration)))
                          :done-goal-ids (read/done-goal-ids db (:id iteration))})))
-   (GET "/goal" [id iterationid iterationid]
+   (GET "/goal" [id iterationid]
         (goal-handler config id iterationid))
    (GET "/books" [iterationid]
         (render.books/layout config
@@ -113,6 +113,9 @@
    (POST "/prioritize/:op/:table" [op table id goalid]
          (update/tweak-priority db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
+   (POST "/update/goal-desc" [desc url id]
+         (update/row db :goal {:description desc} (util/parse-int id))
+         (redirect url))
    (route/resources "/")
    (route/not-found render/not-found)))
 

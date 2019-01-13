@@ -22,20 +22,40 @@
 (defn- format-goal-title [goal]
   (str (:description goal) " by " (:deadline goal) " " (util/format-time (:estimate goal)) ")"))
 
+(defn- url [to params]
+  (case to
+    :goal (util/make-query-url "/goal" {:iterationid (get-in params [:iteration :id])
+                                        :goalid (get-in params [:goal :id])})
+    :index (util/make-query-url "/" {:iterationid (get-in params [:iteration :id])})))
+
+(defn- list-goals [params]
+  [:div
+   [:h2 "Current Goals"]
+   [:ol
+    (for [goal (sort-by :sequence (:goals params))]
+      [:li.mui-panel [:div {:class (if (some #{(:id goal)} (:done-goal-ids params))
+                                     "green"
+                                     "")}
+                      (form-to [:post "/update/goal-desc"]
+                               [:input.long-text {:type :text
+                                                  :name "desc"
+                                                  :value (:description goal)}]
+                               " by 2020"
+                               [:input {:type :hidden :name "id" :value (:id goal)}]
+                               [:input {:type :hidden
+                                        :name "url"
+                                        :value (url :index params)}])
+                      (form-to [:get "/goal"]
+                               [:input {:type :hidden :name "id" :value (:id goal)}]
+                               [:input {:type :hidden :name "iterationid" :value (get-in params [:iteration :id])}]
+                               [:input {:type :submit :value "details"}])]])]])
+
 (defn index [config params]
   (layout config
           (assoc params :url "/" )
           "Overview"
           [:div
-           [:h2 "Current Goals"]
-           [:ol
-            (for [goal (sort-by :sequence (:goals params))]
-              [:li.mui-panel [:div {:class (if (some #{(:id goal)} (:done-goal-ids params)) "green" "")}
-                              [:a {:href
-                                   (util/make-query-url "/goal"
-                                                        {:id (:id goal)
-                                                         :iterationid (get-in params [:iteration :id])})}
-                               (format-goal-title goal)]]])]
+           (list-goals params)
            [:p (str "To fulfill all tasks, a calculated average of "
                     (format "%.1f"
                             (/ (apply + (filter some? (map (comp :hours :estimate) (:goals params)))) 90.0))
