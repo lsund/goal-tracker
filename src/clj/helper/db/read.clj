@@ -58,7 +58,8 @@
              INNER JOIN task ON doneTaskEntry.taskid = task.id
              WHERE doneTaskEntry.tasktype = 1
              AND doneTaskEntry.taskid IN
-               (SELECT id FROM task WHERE iterationid = ? AND goalid = ?);"
+               (SELECT id FROM task WHERE iterationid = ? AND goalid = ?)
+             ORDER BY doneTaskEntry.day;"
             iterationid
             goalid]))
 
