@@ -18,7 +18,7 @@
                      [:th "Done date"]]]
                    [:tbody
                     [:tbody
-                     (for [{:keys [id title done donedate]} books]
+                     (for [{:keys [id title done donedate]} (:books params)]
                        [:tr {:class (if done "green" "")}
                         [:td title]
                         [:td (form-to [:post "/nudge/at/book"]

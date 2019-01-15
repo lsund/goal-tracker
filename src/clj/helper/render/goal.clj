@@ -36,7 +36,7 @@
                                                  {:id (:id goal)
                                                   :iterationid (:id current-iteration)})}])])
 
-(defn list-subgoals [{:keys [current-iteration subgoals]}]
+(defn list-subgoals [{:keys [current-iteration subgoals goal]}]
   [:div
    [:table
     [:thead
@@ -105,12 +105,11 @@
             [:input {:type :hidden :name "current" :value "0"}])])
 
 (defn layout [config params]
-  (println (:subgoals params))
   (render/layout config
                  (assoc params :url "/goal")
                  "Goal"
                  [:div
-                  [:h2 (:description goal)]
+                  [:h2 (get-in params [:goal :description])]
                   [:h3 (util/format-time (:total-estimate params))]
                   [:div.mui-panel
                    (add-subgoal params)
@@ -120,7 +119,7 @@
                    (list-action-items params)]
                   [:div.mui-panel
                    (add-task params)
-                   (html/table goal
+                   (html/table (:goal params)
                                (get-in params [:current-iteration :id])
                                (:tasks params)
                                (fn [task] (<= (:target task) (:current task)))
