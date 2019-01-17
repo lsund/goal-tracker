@@ -72,7 +72,7 @@
                              (read/all db :iteration)
                              iterationid
                              (sort-by :done (read/all db :book))))
-   (POST "/add/:kind" [kind desc deadline goalid url thisiteration]
+   (POST "/add/:kind" [kind desc deadline goalid url thisiteration deadline]
          (case (keyword kind)
            :book (create/row db :book {:title desc
                                        :done false})
@@ -81,6 +81,7 @@
            :actionitem (create/row db :actionitem {:goalid (util/parse-int goalid)
                                                    :description desc})
            :subgoal (create/row db :subgoal {:goalid (util/parse-int goalid)
+                                             :deadline (util/->localdate deadline)
                                              :description desc
                                              :thisiteration (util/checked->bool thisiteration)}))
          (if url
