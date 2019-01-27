@@ -20,6 +20,7 @@ CREATE TABLE SubGoal
     goalid          INT NOT NULL,
     description     VARCHAR(64) NOT NULL,
     deadline        DATE NOT NULL,
+    done            BOOLEAN NOT NULL,
     FOREIGN KEY     (goalid) REFERENCES goal (id)
 );
 

@@ -35,21 +35,19 @@
                                                  {:id (:id goal)
                                                   :iterationid (:id current-iteration)})}])])
 
-(defn- subgoal-description [subgoal]
-  (str (:description subgoal) " by "
-       (:deadline subgoal)))
-
 (defn list-subgoals [{:keys [current-iteration subgoals goal]}]
   [:div
    [:table
     [:thead
      [:tr
-      [:th "Name"]
+      [:th "Description"]
+      [:th "Deadline"]
       [:th "Remove"]]]
     [:tbody
      (for [subgoal subgoals]
        [:tr
-        [:td (subgoal-description subgoal)]
+        [:td (:description subgoal)]
+        [:td (:deadline subgoal)]
         [:td (form-to [:post "/remove/subgoal"]
                       [:input {:type :hidden :name "id" :value (:id subgoal)}]
                       [:input {:type :hidden

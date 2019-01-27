@@ -21,6 +21,12 @@
 (defn all-where [db table clause]
   (j/query db [(str "SELECT * FROM " (name table) " WHERE " clause)]))
 
+(defn all-ordered-by
+  ([db table col]
+   (all-ordered-by db table col :asc))
+  ([db table col how]
+   (j/query db [(str "SELECT * FROM " (name table) " ORDER BY  " (name col)  " " (name how)) ])))
+
 (defn iteration
   ([db]
    (iteration db 0))

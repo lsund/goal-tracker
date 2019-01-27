@@ -8,7 +8,7 @@
    :dbname (:name config)
    :user "postgres"})
 
-(def pg-db-val (pg-db {:name "goal-tracker"}))
+(def pg-db-val (pg-db {:name "goals"}))
 
 (defrecord Db [db db-config]
   c/Lifecycle

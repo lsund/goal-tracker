@@ -30,6 +30,17 @@
 
 (defn- list-goals [params]
   [:div
+   [:h2 "Most current subgoals"]
+   [:table
+    [:thead
+     [:tr
+      [:th "Description"]
+      [:th "Deadline"]]]
+    [:tbody
+     (for [subgoal (take 3 (:subgoals params))]
+       [:tr
+        [:td (:description subgoal)]
+        [:td (:deadline subgoal)]])]]
    [:h2 "Current Goals"]
    [:ol
     (for [goal (sort-by :sequence (:goals params))]

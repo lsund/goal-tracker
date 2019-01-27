@@ -70,6 +70,7 @@
                         {:iterations (read/all db :iteration)
                          :iteration iteration
                          :goals (read/goals-with-estimates db (util/parse-int (:id iteration)))
+                         :subgoals (read/all-ordered-by db :subgoal :deadline)
                          :done-goal-ids (read/done-goal-ids db (:id iteration))})))
    (GET "/goal" [id iterationid]
         (goal-handler config id iterationid))
