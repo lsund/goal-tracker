@@ -1,5 +1,5 @@
 (ns helper.render
-  "Namespace for rendering hiccup"
+  "Namespace for rendering views"
   (:require
    [clojure.string :as string]
    [taoensso.timbre :as logging]
@@ -12,7 +12,7 @@
   [config params title content]
   (html5
    [:head
-    [:title (str "Helper - " title)]]
+    [:title (str "Goal Tracker - " title)]]
    [:body.mui-container
     (html/navbar params)
     content
@@ -47,7 +47,9 @@
                                         :value (url :index params)}])
                       (form-to [:get "/goal"]
                                [:input {:type :hidden :name "id" :value (:id goal)}]
-                               [:input {:type :hidden :name "iterationid" :value (get-in params [:iteration :id])}]
+                               [:input {:type :hidden
+                                        :name "iterationid"
+                                        :value (get-in params [:iteration :id])}]
                                [:input {:type :submit :value "details"}])]])]])
 
 (defn index [config params]
@@ -58,7 +60,10 @@
            (list-goals params)
            [:p (str "To fulfill all tasks, a calculated average of "
                     (format "%.1f"
-                            (/ (apply + (filter some? (map (comp :hours :estimate) (:goals params)))) 90.0))
+                            (/ (apply + (filter some?
+                                                (map (comp :hours :estimate)
+                                                     (:goals params))))
+                               90.0))
                     " hours per day needs to be spent")]
            [:h2 "Add new goal"]
            (form-to [:post "/add/goal"]

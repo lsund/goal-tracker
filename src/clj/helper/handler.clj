@@ -53,6 +53,12 @@
                                                           (str "goalid=" goalid))
                                 :books (read/all db :book)}))))
 
+(defn nudge-at [db table id url]
+  (case (keyword table)
+    :task (update/increment db :task :current (util/parse-int id))
+    :book (update/toggle-done-book db (util/parse-int id)))
+  (redirect url))
+
 (defn- app-routes
   [{:keys [db] :as config}]
   (routes
@@ -104,10 +110,7 @@
            (create/row db :task (merge commons extras)))
          (redirect url))
    (POST "/nudge/at/:table" [table id url]
-         (case (keyword table)
-           :task (update/increment db :task :current (util/parse-int id))
-           :book (update/toggle-done-book db (util/parse-int id)))
-         (redirect url))
+         (nudge-at db table id url))
    (POST "/sort/:op/:table" [op table id goalid]
          (update/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))
