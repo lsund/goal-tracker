@@ -1,4 +1,4 @@
-(ns helper.util
+(ns goal-tracker.util
   "Namespace for utilities"
   (:require [clojure.string :as string]
             [clj-time.format :as time.format]))

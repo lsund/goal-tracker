@@ -1,8 +1,8 @@
-(ns helper.html
+(ns goal-tracker.html
   "Namespace for HTML components"
   (:require [clojure.string :as string]
             [hiccup.form :refer [form-to]]
-            [helper.util :as util]
+            [goal-tracker.util :as util]
             [medley.core :refer [find-first]]))
 
 (defn navbar [params]

@@ -3,8 +3,8 @@
    [figwheel-sidecar.repl-api :as f]
    [clojure.tools.namespace.repl :as tools]
    [com.stuartsierra.component :as c]
-   [helper.config :as config]
-   [helper.core :refer [new-system]]
+   [goal-tracker.config :as config]
+   [goal-tracker.core :refer [new-system]]
    ,,,))
 
 (defn fig-start

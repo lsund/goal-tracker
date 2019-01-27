@@ -1,6 +1,6 @@
-(ns helper.db.delete
+(ns goal-tracker.db.delete
   (:require [clojure.java.jdbc :as j]
-            [helper.db.read :as read]))
+            [goal-tracker.db.read :as read]))
 
 (defn by-id [db table id]
   (j/delete! db table ["id=?" id]))

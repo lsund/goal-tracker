@@ -1,14 +1,14 @@
-(ns helper.db.core
+(ns goal-tracker.db.core
   "Namespace for database interfacing"
   (:require [com.stuartsierra.component :as c]
-            [helper.config :as config]))
+            [goal-tracker.config :as config]))
 
 (defn pg-db [config]
   {:dbtype "postgresql"
    :dbname (:name config)
    :user "postgres"})
 
-(def pg-db-val (pg-db {:name "helper"}))
+(def pg-db-val (pg-db {:name "goal-tracker"}))
 
 (defrecord Db [db db-config]
   c/Lifecycle

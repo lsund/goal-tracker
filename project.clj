@@ -1,6 +1,6 @@
-(defproject helper "0.1.0-SNAPSHOT"
+(defproject goal-tracker "0.1.0-SNAPSHOT"
   :description "TODO"
-  :url "https://github.com/lsund/helper"
+  :url "https://github.com/lsund/goal-tracker"
 
 
   :min-lein-version "2.7.0"
@@ -26,24 +26,24 @@
             [io.aviso/pretty "0.1.34"]]
   :source-paths ["src/clj" "src/cljs"]
   :ring
-  {:handler helper.core/new-handler}
+  {:handler goal-tracker.core/new-handler}
   :main
-  helper.main
+  goal-tracker.main
   :cljsbuild {:builds
               [{:id           "dev"
                 :source-paths ["src/cljs"]
-                :figwheel {:on-jsload "helper.core/on-js-reload"
+                :figwheel {:on-jsload "goal-tracker.core/on-js-reload"
                            :open-urls ["http://localhost:3449/index.html"]}
-                :compiler {:main                 helper.core
+                :compiler {:main                 goal-tracker.core
                            :asset-path           "js/compiled/out"
-                           :output-to            "resources/public/js/compiled/helper.js"
+                           :output-to            "resources/public/js/compiled/goal-tracker.js"
                            :output-dir           "resources/public/js/compiled/out"
                            :source-map-timestamp true
                            :preloads             [devtools.preload]}}
                {:id           "min"
                 :source-paths ["src/cljs"]
-                :compiler     {:output-to     "resources/public/js/compiled/helper.js"
-                               :main          helper.core
+                :compiler     {:output-to     "resources/public/js/compiled/goal-tracker.js"
+                               :main          goal-tracker.core
                                :optimizations :advanced
                                :pretty-print  false}}]}
   :figwheel

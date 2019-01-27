@@ -1,12 +1,12 @@
-(ns helper.render
+(ns goal-tracker.render
   "Namespace for rendering views"
   (:require
    [clojure.string :as string]
    [taoensso.timbre :as logging]
    [hiccup.form :refer [form-to]]
    [hiccup.page :refer [html5 include-css include-js]]
-   [helper.util :as util]
-   [helper.html :as html]))
+   [goal-tracker.util :as util]
+   [goal-tracker.html :as html]))
 
 (defn layout
   [config params title content]

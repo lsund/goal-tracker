@@ -1,5 +1,5 @@
-(ns helper.render.books
-  (:require [helper.render :as render]
+(ns goal-tracker.render.books
+  (:require [goal-tracker.render :as render]
             [hiccup.form :refer [form-to]]))
 
 (defn layout [config params]

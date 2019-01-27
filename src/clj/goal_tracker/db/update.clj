@@ -1,11 +1,11 @@
-(ns helper.db.update
+(ns goal-tracker.db.update
   (:require [clojure.java.jdbc :as j]
             [clj-time.core :as time]
-            [helper.util :as util]
-            [helper.db.core :as db]
-            [helper.db.create :as create]
-            [helper.db.read :as read]
-            [helper.db.delete :as delete]))
+            [goal-tracker.util :as util]
+            [goal-tracker.db.core :as db]
+            [goal-tracker.db.create :as create]
+            [goal-tracker.db.read :as read]
+            [goal-tracker.db.delete :as delete]))
 
 (defn row [db table data id]
   (j/update! db table data ["id=?" id]))

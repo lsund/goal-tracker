@@ -1,8 +1,8 @@
-(ns helper.render.goal
-  (:require [helper.render :as render]
+(ns goal-tracker.render.goal
+  (:require [goal-tracker.render :as render]
             [hiccup.form :refer [form-to]]
-            [helper.util :as util]
-            [helper.html :as html]))
+            [goal-tracker.util :as util]
+            [goal-tracker.html :as html]))
 
 (defn add-subgoal [{:keys [goal current-iteration]}]
   [:div

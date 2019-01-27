@@ -1,9 +1,9 @@
-(ns helper.db.read
+(ns goal-tracker.db.read
   (:require [clojure.java.jdbc :as j]
             [clj-time.core :as time]
-            [helper.util :as util]
+            [goal-tracker.util :as util]
             [medley.core :refer [find-first]]
-            [helper.db.core :as db]
+            [goal-tracker.db.core :as db]
             [slingshot.slingshot :refer [throw+]]))
 
 (defn row [db table id]

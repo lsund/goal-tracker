@@ -1,9 +1,9 @@
-(ns helper.app
+(ns goal-tracker.app
   "Namespace for defining the application component"
   (:require
    [com.stuartsierra.component :as c]
    [compojure.handler :refer [site]]
-   [helper.handler :as handler]))
+   [goal-tracker.handler :as handler]))
 
 (defrecord App [handler app-config db]
   c/Lifecycle

@@ -1,4 +1,4 @@
 {:server {:port 3007}
  :app {:styles ["/css/style.css" "/css/mui.css"]
-       :javascripts ["/js/compiled/helper.js"]}
- :db {:name "helper"}}
+       :javascripts ["/js/compiled/goal-tracker.js"]}
+ :db {:name "goals"}}

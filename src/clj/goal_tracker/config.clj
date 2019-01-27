@@ -1,4 +1,4 @@
-(ns helper.config
+(ns goal-tracker.config
   "Namespace for loading configuration"
   (:require [clojure.edn :as edn]))
 

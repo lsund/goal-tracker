@@ -1,4 +1,4 @@
-(ns helper.core
+(ns goal-tracker.core
   (:require
    [reagent.core :as reagent :refer [atom]]))
 

@@ -1,10 +1,10 @@
-(ns helper.core
+(ns goal-tracker.core
   "Namespace that defines the system of components."
   (:require
    [com.stuartsierra.component :as c]
-   [helper.app :as app]
-   [helper.server :as server]
-   [helper.db.core :as db]))
+   [goal-tracker.app :as app]
+   [goal-tracker.server :as server]
+   [goal-tracker.db.core :as db]))
 
 (defn new-system
   [config]

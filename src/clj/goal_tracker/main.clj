@@ -1,10 +1,10 @@
-(ns helper.main
+(ns goal-tracker.main
   "Namespace for running the program once"
   (:require
-   [helper.config :as config]
+   [goal-tracker.config :as config]
    [org.httpkit.server :refer [run-server]]
    [compojure.handler :refer [site]]
-   [helper.handler :refer [new-handler]])
+   [goal-tracker.handler :refer [new-handler]])
   (:gen-class))
 
 (defn -main [& args]

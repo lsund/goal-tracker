@@ -1,6 +1,6 @@
-(ns helper.db.create
+(ns goal-tracker.db.create
   (:require [clojure.java.jdbc :as j]
-            [helper.util :as util]
+            [goal-tracker.util :as util]
             [clj-time.core :as time]))
 
 (defn row [db table row]
