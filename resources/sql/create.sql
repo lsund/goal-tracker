@@ -19,7 +19,6 @@ CREATE TABLE SubGoal
     id              SERIAL PRIMARY KEY,
     goalid          INT NOT NULL,
     description     VARCHAR(64) NOT NULL,
-    thisiteration   BOOLEAN NOT NULL,
     deadline        DATE NOT NULL,
     FOREIGN KEY     (goalid) REFERENCES goal (id)
 );

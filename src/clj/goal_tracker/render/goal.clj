@@ -13,14 +13,12 @@
                      :placeholder "Description"
                      :required "true"}]
             [:input {:type :date :name "deadline" :required "true"}]
-            [:input {:type :checkbox :name "thisiteration" :checked "true"}]
             [:input {:type :hidden :name "goalid" :value (:id goal)}]
             [:input {:type :hidden
                      :name "url"
                      :value (util/make-query-url "/goal"
                                                  {:id (:id goal)
-                                                  :iterationid (:id current-iteration)})}]
-            [:label "This iteration?"])])
+                                                  :iterationid (:id current-iteration)})}])])
 
 (defn add-action-item [{:keys [goal current-iteration]}]
   [:div
@@ -39,8 +37,7 @@
 
 (defn- subgoal-description [subgoal]
   (str (:description subgoal) " by "
-       (:deadline subgoal)
-       (str (if (:thisiteration subgoal) " (this iteration)" ""))))
+       (:deadline subgoal)))
 
 (defn list-subgoals [{:keys [current-iteration subgoals goal]}]
   [:div
