@@ -28,19 +28,29 @@
                                         :goalid (get-in params [:goal :id])})
     :index (util/make-query-url "/" {:iterationid (get-in params [:iteration :id])})))
 
-(defn- list-goals [params]
-  [:div
-   [:h2 "Most current subgoals"]
-   [:table
+(defn subgoal-table [subgoals]
+  [:table
     [:thead
      [:tr
       [:th "Description"]
       [:th "Deadline"]]]
     [:tbody
-     (for [subgoal (take 3 (:subgoals params))]
+     (for [subgoal subgoals]
        [:tr
         [:td (:description subgoal)]
-        [:td (:deadline subgoal)]])]]
+        [:td (:deadline subgoal)]])]])
+
+(defn subgoals [config params]
+  (layout config
+          (assoc params :url "/")
+          "All Subgoals"
+          (subgoal-table (:subgoals params))))
+
+(defn- list-goals [params]
+  [:div
+   [:h2 "Most current subgoals"]
+   (subgoal-table (take 3 (:subgoals params)))
+   [:a {:href "/subgoals"} "Show all"]
    [:h2 "Current Goals"]
    [:ol
     (for [goal (sort-by :sequence (:goals params))]

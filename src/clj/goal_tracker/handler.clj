@@ -74,6 +74,8 @@
                          :done-goal-ids (read/done-goal-ids db (:id iteration))})))
    (GET "/goal" [id iterationid]
         (goal-handler config id iterationid))
+   (GET "/subgoals" []
+        (render/subgoals config {:subgoals (read/all-ordered-by db :subgoal :deadline)}))
    (GET "/books" [iterationid]
         (render.books/layout config
                              (read/all db :iteration)
