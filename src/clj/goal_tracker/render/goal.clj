@@ -114,12 +114,16 @@
   [:table
    [:thead
     [:tr
-     [:th "Description"]
+     [:th "Actionitem"]
+     [:th "Task"]
+     [:th "Done-at"]
      [:th "Remove"]]]
    [:tbody
-    (for [{:keys [description day id taskid]} (:task-log params)]
+    (for [{:keys [taskdescription actionitemdescription day id taskid]} (:task-log params)]
       [:tr
-       [:td (str description " done on " day)]
+       [:td actionitemdescription]
+       [:td taskdescription]
+       [:td day]
        [:td
         (form-to [:post "/remove/donetaskentry"]
                  [:input {:type :hidden :name "id" :value id}]

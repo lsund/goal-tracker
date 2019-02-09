@@ -6,7 +6,7 @@
 (defn row [db table row]
   (j/insert! db table row))
 
-(defn done-task-entry [db table id]
+(defn done-task-entry [db id]
   (row db :donetaskentry {:taskid id
                           :tasktype 1
                           :day (util/->sqldate (time/now))}))

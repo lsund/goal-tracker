@@ -68,9 +68,16 @@
 
 (defn task-log [db iterationid goalid]
   (j/query db
-           ["SELECT doneTaskEntry.day, doneTaskEntry.taskid, doneTaskEntry.id, task.description
+           ["SELECT doneTaskEntry.day,
+                    doneTaskEntry.taskid,
+                    doneTaskEntry.id,
+                    actionItem.description as actionitemdescription,
+                    task.description as taskdescription
              FROM doneTaskEntry
-             INNER JOIN task ON doneTaskEntry.taskid = task.id
+             INNER JOIN task
+             ON doneTaskEntry.taskid = task.id
+             INNER JOIN actionItem
+             ON task.actionitemid = actionItem.id
              WHERE doneTaskEntry.tasktype = 1
              AND doneTaskEntry.taskid IN
                (SELECT id FROM task WHERE iterationid = ? AND goalid = ?)

@@ -17,16 +17,6 @@
             [ring.middleware.params :refer [wrap-params]]
             [ring.util.response :refer [redirect]]))
 
-(defn ensure-current-iteration [handler db]
-  (fn [req]
-    (when-not (read/iteration db)
-      (let [now (time/now)
-            first-day (time/first-day-of-the-month now)
-            last-day (time/last-day-of-the-month now)]
-        (create/row db :iteration {:startdate (util/->sqldate first-day)
-                                   :enddate (util/->sqldate last-day)})))
-    (handler req)))
-
 (defn- all-tasks [db iterationid goalid]
   (map-vals (partial sort-by :sequence)
             {:tasks (read/all-incremental-tasks db goalid iterationid)}))
@@ -79,9 +69,9 @@
         (render/subgoals config {:subgoals (read/subgoals db)}))
    (GET "/books" [iterationid]
         (render.books/layout config
-                             (read/all db :iteration)
-                             iterationid
-                             (sort-by :done (read/all db :book))))
+                             {:iteration (read/all db :iteration)
+                              :books (sort-by :done (read/all db :book))
+                              :iterationid iterationid}))
    (POST "/add/:kind" [kind desc deadline goalid url thisiteration deadline]
          (case (keyword kind)
            :book (create/row db :book {:title desc
@@ -132,7 +122,6 @@
 (defn new-handler
   [config]
   (-> (app-routes config)
-      (ensure-current-iteration (:db config))
       (wrap-keyword-params)
       (wrap-params)
       (wrap-defaults

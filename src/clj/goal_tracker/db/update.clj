@@ -26,7 +26,7 @@
                           " = "
                           (name column)
                           " + 1 WHERE id=?") id])
-        (create/done-task-entry db :incrementaltask id)))))
+        (create/done-task-entry db id)))))
 
 (defn decrement [db table column id]
   (j/execute! db
