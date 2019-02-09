@@ -56,7 +56,8 @@
 (defn nudge-at [db table id url]
   (case (keyword table)
     :task (update/increment db :task :current (util/parse-int id))
-    :book (update/toggle-done-book db (util/parse-int id)))
+    :book (update/toggle-done db :book (util/parse-int id))
+    :subgoal (update/toggle-done db :subgoal (util/parse-int id)))
   (redirect url))
 
 (defn- app-routes

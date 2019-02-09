@@ -33,6 +33,7 @@
              FROM subgoal
              INNER JOIN goal
              ON subgoal.goalid = goal.id
+             WHERE subgoal.done = 'f'
              ORDER BY deadline"]))
 
 (defn iteration

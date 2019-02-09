@@ -38,10 +38,12 @@
                     (name column)
                     " - 1 WHERE id=?") id]))
 
-(defn toggle-done-book [db id]
-  (let [was-done? (read/value db :book :done id)]
-    (row db :book {:done (not was-done?)
-                   :donedate (when (not was-done?) (util/->sqldate (time/now)))} id)))
+(defn toggle-done [db table id]
+  (let [was-done? (read/value db table :done id)]
+    (case table
+      :book (row db :book {:done (not was-done?)
+                           :donedate (when (not was-done?) (util/->sqldate (time/now)))} id)
+      :subgoal (row db :subgoal {:done (not was-done?)} id))))
 
 (defn- succ-priority [p]
   (case p
