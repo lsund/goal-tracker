@@ -32,6 +32,7 @@
                                {:goal (read/row db :goal (util/parse-int id))
                                 :iterations (read/all db :iteration)
                                 :current-iteration current-iteration
+                                :benefits (read/all-where db :benefit (str "goalid=" goalid))
                                 :total-estimate (read/total-estimate db
                                                                      (util/parse-int id)
                                                                      (util/parse-int iterationid))
@@ -83,7 +84,9 @@
            :subgoal (create/row db :subgoal {:goalid (util/parse-int goalid)
                                              :deadline (util/->localdate deadline)
                                              :description desc
-                                             :thisiteration (util/checked->bool thisiteration)}))
+                                             :thisiteration (util/checked->bool thisiteration)})
+           :benefit (create/row db :benefit {:goalid (util/parse-int goalid)
+                                             :description desc}))
          (if url
            (redirect url)
            (redirect "/")))

@@ -94,8 +94,7 @@
         [:td (form-to [:post "/sort/down/goal"]
                   [:input {:type :hidden :name "url" :value "/"}]
                   [:input {:type :hidden :name "id" :value (:id goal)}]
-                  [:input {:type :submit :value "x"}])]
-        ])]]])
+                  [:input {:type :submit :value "x"}])]])]]])
 
 (defn index [config params]
   (layout config

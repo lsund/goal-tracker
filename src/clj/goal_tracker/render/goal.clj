@@ -4,6 +4,26 @@
             [goal-tracker.util :as util]
             [goal-tracker.html :as html]))
 
+(defn add-benefit [{:keys [goal current-iteration]}]
+  [:div
+   [:h3.center "Benefits"]
+   (form-to [:post "/add/benefit"]
+            [:input {:type :text
+                     :name "desc"
+                     :placeholder "Benefit Description"
+                     :required "true"}]
+            [:input {:type :hidden :name "goalid" :value (:id goal)}]
+            [:input {:type :hidden
+                     :name "url"
+                     :value (util/make-query-url "/goal"
+                                                 {:id (:id goal)
+                                                  :iterationid (:id current-iteration)})}])])
+
+(defn list-benefits [{:keys [benefits]}]
+  [:ul
+   (for [benefit benefits]
+     [:li (:description benefit)])])
+
 (defn add-subgoal [{:keys [goal current-iteration]}]
   [:div
    [:h3.center "Subgoals"]
@@ -139,6 +159,9 @@
                  "Goal"
                  [:div
                   [:h2 (get-in params [:goal :description])]
+                  [:div.mui-panel
+                   (add-benefit params)
+                   (list-benefits params)]
                   [:h3 (util/format-time (:total-estimate params))]
                   [:div.mui-panel
                    (add-subgoal params)

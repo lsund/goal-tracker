@@ -14,6 +14,14 @@ CREATE TABLE Goal
     deadline        DATE NOT NULL
 );
 
+CREATE TABLE Benefit
+(
+    id              SERIAL PRIMARY KEY,
+    description     VARCHAR(64) NOT NULL,
+    goalid          INT NOT NULL,
+    FOREIGN KEY     (goalid) REFERENCES goal (id)
+);
+
 CREATE TABLE SubGoal
 (
     id              SERIAL PRIMARY KEY,
