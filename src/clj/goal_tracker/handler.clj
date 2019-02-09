@@ -96,7 +96,9 @@
          (if url
            (redirect url)
            (redirect "/")))
-   (POST "/remove/:kind" [kind id url]
+   (POST "/remove/:kind" [kind id taskid url]
+         (when (= (keyword kind) :donetaskentry)
+           (update/decrement db :task :current (util/parse-int taskid)))
          (delete/by-id db (keyword kind) (util/parse-int id))
          (if url
            (redirect url)

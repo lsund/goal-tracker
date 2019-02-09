@@ -105,6 +105,30 @@
             [:input.hidden {:type :submit}]
             [:input {:type :hidden :name "current" :value "0"}])])
 
+(defn- current-url [params]
+  (util/make-query-url "/goal"
+                       {:id (get-in params [:goal :id])
+                        :iterationid (get-in params [:current-iteration :id])}))
+
+(defn task-log [params]
+  [:table
+   [:thead
+    [:tr
+     [:th "Description"]
+     [:th "Remove"]]]
+   [:tbody
+    (for [{:keys [description day id taskid]} (:task-log params)]
+      [:tr
+       [:td (str description " done on " day)]
+       [:td
+        (form-to [:post "/remove/donetaskentry"]
+                 [:input {:type :hidden :name "id" :value id}]
+                 [:input {:type :hidden :name "taskid" :value taskid}]
+                 [:input {:type :hidden
+                          :name "url"
+                          :value (current-url params)}]
+                 [:input {:type :submit :value "x"}])]])]])
+
 (defn layout [config params]
   (render/layout config
                  (assoc params :url "/goal")
@@ -128,7 +152,5 @@
                                :target
                                :unit)]
                   [:div.mui-panel
-                   [:h3 "Updated Tasks"]
-                   [:ul
-                    (for [{:keys [description day]} (:task-log params)]
-                      [:li (str description " done on " day)])]]]))
+                   [:h3.center "Task Log"]
+                   (task-log params)]]))

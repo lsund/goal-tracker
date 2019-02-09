@@ -11,6 +11,24 @@
   (j/update! db table data ["id=?" id]))
 
 (defn increment [db table column id]
+  (let [current (read/value db table :current id)
+        target (read/value db table :target id)]
+    (if (= current target)
+      (do
+        (row db table {:current 0} id)
+        (delete/by-column-id db :donetaskentry :taskid id))
+      (do
+        (j/execute! db
+                    [(str "UPDATE "
+                          (name table)
+                          " SET "
+                          (name column)
+                          " = "
+                          (name column)
+                          " + 1 WHERE id=?") id])
+        (create/done-task-entry db :incrementaltask id)))))
+
+(defn decrement [db table column id]
   (j/execute! db
               [(str "UPDATE "
                     (name table)
@@ -18,20 +36,12 @@
                     (name column)
                     " = "
                     (name column)
-                    " + 1 WHERE id=?") id])
-  (create/done-task-entry db :incrementaltask id))
-
-(defn toggle-done-task [db table id]
-  (let [was-done? (read/value db table :done id)]
-    (row db (keyword table) {:done (not was-done?)} id)
-    (if was-done?
-      (delete/done-task-entry db id)
-      (create/done-task-entry db table id))))
+                    " - 1 WHERE id=?") id]))
 
 (defn toggle-done-book [db id]
   (let [was-done? (read/value db :book :done id)]
     (row db :book {:done (not was-done?)
-                            :donedate (when (not was-done?) (util/->sqldate (time/now)))} id)))
+                   :donedate (when (not was-done?) (util/->sqldate (time/now)))} id)))
 
 (defn- succ-priority [p]
   (case p

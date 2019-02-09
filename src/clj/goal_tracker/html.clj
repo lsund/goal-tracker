@@ -6,7 +6,6 @@
             [medley.core :refer [find-first]]))
 
 (defn navbar [params]
-  (println (:url params))
   [:div.mui-appbar
    [:table {:width "100%"}
     (let [iterationid (get-in params [:iteration :id])]
