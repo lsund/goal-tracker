@@ -116,9 +116,9 @@
          (redirect url))
    (POST "/nudge/at/:table" [table id url]
          (nudge-at db table id url))
-   (POST "/sort/:op/:table" [op table id goalid]
+   (POST "/sort/:op/:table" [op table id goalid url]
          (update/tweak-sequence db (keyword table) (util/parse-int id) (keyword op))
-         (redirect (str "/goal?id=" goalid)))
+         (redirect url))
    (POST "/prioritize/:op/:table" [op table id goalid]
          (update/tweak-priority db (keyword table) (util/parse-int id) (keyword op))
          (redirect (str "/goal?id=" goalid)))

@@ -61,8 +61,8 @@
   [:table
    [:thead
     [:tr
-     [:th "Name"
-      :th "Remove"]]]
+     [:th "Name"]
+     [:th "Remove"]]]
    [:tbody
     (for [item actionitems]
       [:tr

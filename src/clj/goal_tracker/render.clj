@@ -30,17 +30,17 @@
 
 (defn subgoal-table [subgoals]
   [:table
-    [:thead
-     [:tr
-      [:th "Goal Sequence Number"]
-      [:th "Description"]
-      [:th "Deadline"]]]
-    [:tbody
-     (for [subgoal subgoals]
-       [:tr
-        [:td (:sequence subgoal)]
-        [:td (:description subgoal)]
-        [:td (:deadline subgoal)]])]])
+   [:thead
+    [:tr
+     [:th "Goal Sequence Number"]
+     [:th "Description"]
+     [:th "Deadline"]]]
+   [:tbody
+    (for [subgoal subgoals]
+      [:tr
+       [:td (:sequence subgoal)]
+       [:td (:description subgoal)]
+       [:td (:deadline subgoal)]])]])
 
 (defn subgoals [config params]
   (layout config
@@ -54,11 +54,12 @@
    (subgoal-table (take 3 (:subgoals params)))
    [:a {:href "/subgoals"} "Show all"]
    [:h2 "Current Goals"]
-   [:ol
+   [:ul
     (for [goal (sort-by :sequence (:goals params))]
       [:li.mui-panel [:div {:class (if (some #{(:id goal)} (:done-goal-ids params))
                                      "green"
                                      "")}
+                      [:h3 (:sequence goal)]
                       (form-to [:post "/update/goal-desc"]
                                [:input.long-text {:type :text
                                                   :name "desc"
@@ -73,7 +74,15 @@
                                [:input {:type :hidden
                                         :name "iterationid"
                                         :value (get-in params [:iteration :id])}]
-                               [:input {:type :submit :value "details"}])]])]])
+                               [:input {:type :submit :value "details"}])
+                      (form-to [:post "/sort/up/goal"]
+                               [:input {:type :hidden :name "url" :value "/"}]
+                               [:input {:type :hidden :name "id" :value (:id goal)}]
+                               [:input {:type :submit :value "sort goal up"}])
+                      (form-to [:post "/sort/down/goal"]
+                               [:input {:type :hidden :name "url" :value "/"}]
+                               [:input {:type :hidden :name "id" :value (:id goal)}]
+                               [:input {:type :submit :value "sort goal down"}])]])]])
 
 (defn index [config params]
   (layout config
