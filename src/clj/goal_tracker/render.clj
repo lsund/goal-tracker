@@ -32,11 +32,13 @@
   [:table
     [:thead
      [:tr
+      [:th "Goal Sequence Number"]
       [:th "Description"]
       [:th "Deadline"]]]
     [:tbody
      (for [subgoal subgoals]
        [:tr
+        [:td (:sequence subgoal)]
         [:td (:description subgoal)]
         [:td (:deadline subgoal)]])]])
 

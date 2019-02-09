@@ -1,7 +1,6 @@
 (defproject goal-tracker "0.1.0-SNAPSHOT"
-  :description "TODO"
+  :description "Personal goal tracking program"
   :url "https://github.com/lsund/goal-tracker"
-
 
   :min-lein-version "2.7.0"
 
@@ -30,7 +29,7 @@
   :main
   goal-tracker.main
   :cljsbuild {:builds
-              [{:id           "dev"
+              [{:id "dev"
                 :source-paths ["src/cljs"]
                 :figwheel {:on-jsload "goal-tracker.core/on-js-reload"
                            :open-urls ["http://localhost:3449/index.html"]}

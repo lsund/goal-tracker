@@ -27,6 +27,14 @@
   ([db table col how]
    (j/query db [(str "SELECT * FROM " (name table) " ORDER BY  " (name col)  " " (name how)) ])))
 
+(defn subgoals [db]
+  (j/query db
+           ["SELECT subgoal.*, goal.sequence
+             FROM subgoal
+             INNER JOIN goal
+             ON subgoal.goalid = goal.id
+             ORDER BY deadline"]))
+
 (defn iteration
   ([db]
    (iteration db 0))
