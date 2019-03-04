@@ -83,15 +83,15 @@
                       [:input {:type :hidden
                                :name "iterationid"
                                :value (get-in params [:iteration :id])}]
-                      [:input {:type :submit :value "x"}])]
+                      [:input {:type :submit :value "E"}])]
         [:td (form-to [:post "/sort/up/goal"]
                   [:input {:type :hidden :name "url" :value "/"}]
                   [:input {:type :hidden :name "id" :value (:id goal)}]
-                  [:input {:type :submit :value "x"}])]
+                  [:input {:type :submit :value "U"}])]
         [:td (form-to [:post "/sort/down/goal"]
                   [:input {:type :hidden :name "url" :value "/"}]
                   [:input {:type :hidden :name "id" :value (:id goal)}]
-                  [:input {:type :submit :value "x"}])]])]]])
+                  [:input {:type :submit :value "D"}])]])]]])
 
 (defn index [config params]
   (layout config

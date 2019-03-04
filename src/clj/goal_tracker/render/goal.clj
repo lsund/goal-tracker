@@ -62,12 +62,20 @@
      [:tr
       [:th "Description"]
       [:th "Deadline"]
+      [:th "Toggle done"]
       [:th "Remove"]]]
     [:tbody
      (for [subgoal subgoals]
-       [:tr
+       [:tr {:class (if (:done subgoal)
+                      "green"
+                      "")}
         [:td (:description subgoal)]
         [:td (:deadline subgoal)]
+        [:td
+         (form-to [:post "/nudge/at/subgoal"]
+                  [:input {:type :hidden :name "id" :value (:id subgoal)}]
+                  [:input {:type :hidden :name "url" :value "/"}]
+                  [:input {:type :submit :value "x"}])]
         [:td (form-to [:post "/remove/subgoal"]
                       [:input {:type :hidden :name "id" :value (:id subgoal)}]
                       [:input {:type :hidden
