@@ -72,3 +72,13 @@
                     update-fn)]
     (when (and nxt (< 0 nxt))
       (row db table {:sequence nxt} id))))
+
+(defn merge-goals [db from to]
+  (doseq [{:keys [id]} (read/all-where db :actionitem (str "goalid = " from))]
+    (row db :actionitem {:goalid to} id))
+  (doseq [{:keys [id]} (read/all-where db :benefit (str "goalid = " from))]
+    (row db :benefit {:goalid to} id))
+  (doseq [{:keys [id]} (read/all-where db :subgoal (str "goalid = " from))]
+    (row db :subgoal {:goalid to} id))
+  (doseq [{:keys [id]} (read/all-where db :task (str "goalid = " from))]
+    (row db :task {:goalid to} id)))
