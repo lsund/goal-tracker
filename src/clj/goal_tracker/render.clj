@@ -19,9 +19,6 @@
     (apply include-css (:styles config))
     (apply include-js (:javascripts config))]))
 
-(defn- format-goal-title [goal]
-  (str (:description goal) " by " (:deadline goal) " " (util/format-time (:estimate goal)) ")"))
-
 (defn- url [to params]
   (case to
     :goal (util/make-query-url "/goal" {:iterationid (get-in params [:iteration :id])
@@ -78,7 +75,7 @@
                       [:input.long-text {:type :text
                                          :name "desc"
                                          :value (:description goal)}]
-                      " by 2020"
+                      (str "by " (:deadline goal))
                       [:input {:type :hidden :name "id" :value (:id goal)}]
                       [:input {:type :hidden :name "url" :value "/"}])]
         [:td (form-to [:get "/goal"]

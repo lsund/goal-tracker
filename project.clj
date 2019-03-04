@@ -43,10 +43,10 @@
                                :pretty-print  false}}]}
   :figwheel {:css-dirs ["resources/public/css"]}
   :repl-options {:init-ns user}
-  :profiles {:dev {:dependencies  [[binaryage/devtools "0.9.9"]
-                                   [figwheel-sidecar "0.5.15"]
-                                   [com.cemerick/piggieback "0.2.2"]]
-                   :source-paths  ["src/clj" "src/cljs" "dev"]
-                   :repl-options  {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+  :profiles {:dev {:dependencies [[binaryage/devtools "0.9.9"]
+                                  [figwheel-sidecar "0.5.15"]
+                                  [com.cemerick/piggieback "0.2.2"]]
+                   :source-paths ["src/clj" "src/cljs" "dev"]
+                   :repl-options {:nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
                    :clean-targets ^{:protect false} ["resources/public/js/compiled"
                                                      :target-path]}})
