@@ -6,6 +6,17 @@
 (defn stringify [k] (-> k name string/capitalize))
 
 (defn parse-int [x]
+  {:pre [(or integer? x (re-matches #"-?\d+" x))]}
+  (if (integer? x)
+    x
+    (Integer/parseInt x)))
+
+(defn extract-int [x]
+  "Parses the given string `x` and retrieves the first readable integer.
+
+   Example:
+   (extract-int \"Total 500Euro\")
+   => 500"
   (cond
     (= (type x) java.lang.Integer) x
     (= (type x) java.lang.String) (try (Integer. (re-find #"\d+" x))
@@ -45,6 +56,7 @@
 (defn normalize-time [{:keys [hours minutes]}]
   {:hours (+ (or  hours 0) (quot (or minutes 0) 60))
    :minutes (rem (or minutes 0) 60)})
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Date
 

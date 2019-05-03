@@ -41,13 +41,14 @@
    (iteration db 0))
   ([db n]
    (let [now (util/->sqldate (.plusMonths (time/now) n))]
-     (when-let [iteration (first (j/query db
-                                          [(str "SELECT *
+     (if-let [iteration (first (j/query db
+                                        [(str "SELECT *
                                               FROM iteration
                                               WHERE ? >= startdate and ? <= enddate")
-                                           now
-                                           now]))]
-       iteration))))
+                                         now
+                                         now]))]
+       iteration
+       (throw (Exception. "No iteration could be read"))))))
 
 (defn all-incremental-tasks [db goalid iterationid]
   (j/query db ["SELECT task.*, actionitem.description as actionitemdescription
@@ -87,7 +88,7 @@
 
 (defn- parse-time-val [{:keys [timeestimate target]}]
   (when timeestimate
-    [(* (util/parse-int timeestimate) (or target 1))
+    [(* (util/extract-int timeestimate) (or target 1))
      (cond
        (re-matches #"[0-9]+h" timeestimate) :hours
        (re-matches #"[0-9]+m" timeestimate) :minutes
